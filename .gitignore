@@ -23,7 +23,15 @@ logs/
 *.log
 .system_generated/
 
-# SQLite WAL and journal files
+# Local SQLite database files and journals
+*.db
+*.sqlite
+*.sqlite3
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Local uploads/runtime data
+uploads/
+.tmp/
+tmp/
