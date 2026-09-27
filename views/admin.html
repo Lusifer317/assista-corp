@@ -13,393 +13,71 @@
 </head>
 <body class="admin-body">
 
-  <!-- Sidebar Navigation -->
   <aside class="admin-sidebar">
     <div>
       <div class="brand-logo" style="margin-bottom: 2rem; background: #FFFFFF; padding: 0.65rem 0.85rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
         <img src="/images/assista-logo.svg" alt="Assista Corp" style="height: 30px; width: auto; display: block;" onerror="this.src='/images/assista-logo.png'">
       </div>
-
       <nav class="admin-nav">
-        <div class="admin-nav-item active" data-tab="live">
-          <span>●</span> Live Activity
-          <span class="pulse-dot" style="margin-left: auto;"></span>
-        </div>
-        <div class="admin-nav-item" data-tab="crm">
-          <span>❖</span> CRM Pipeline
-          <span class="nav-badge" id="crm-total-badge">0</span>
-        </div>
-        <div class="admin-nav-item" data-tab="analytics">
-          <span>▲</span> Visitor Intelligence
-        </div>
-        <div class="admin-nav-item" data-tab="cms">
-          <span>✎</span> CMS Studio
-        </div>
-        <div class="admin-nav-item" data-tab="seo">
-          <span>◉</span> SEO & Settings
-        </div>
-        <div class="admin-nav-item" data-tab="audit">
-          <span>⚑</span> Security & Audit
-        </div>
+        <div class="admin-nav-item active" data-tab="live"><span>●</span> Live Activity <span class="pulse-dot" style="margin-left: auto;"></span></div>
+        <div class="admin-nav-item" data-tab="crm"><span>❖</span> CRM Pipeline <span class="nav-badge" id="crm-total-badge">0</span></div>
+        <div class="admin-nav-item" data-tab="analytics"><span>▲</span> Visitor Intelligence</div>
+        <div class="admin-nav-item" data-tab="cms"><span>✎</span> CMS Studio</div>
+        <div class="admin-nav-item" data-tab="seo"><span>◉</span> SEO & Settings</div>
+        <div class="admin-nav-item" data-tab="audit"><span>⚑</span> Security & Audit</div>
       </nav>
     </div>
-
     <div>
       <div class="admin-user-pill" style="margin-bottom: 1.25rem;">
-        <div style="width:34px; height:34px; border-radius:50%; background:var(--admin-accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#FFF;">
-          <span id="user-initial">A</span>
-        </div>
-        <div>
-          <div style="font-weight:600; color:#FFFFFF;" id="user-name">Elena Rostova</div>
-          <div style="font-size:0.7rem; color:var(--admin-text-muted);" id="user-email">admin@assistacorp.com</div>
-        </div>
+        <div style="width:34px; height:34px; border-radius:50%; background:var(--admin-accent); display:flex; align-items:center; justify-content:center; font-weight:700; color:#FFF;"><span id="user-initial">A</span></div>
+        <div><div style="font-weight:600; color:#FFFFFF;" id="user-name">Elena Rostova</div><div style="font-size:0.7rem; color:var(--admin-text-muted);" id="user-email">admin@assistacorp.com</div></div>
       </div>
-      
-      <div style="display:flex; gap:0.5rem;">
-        <a href="/" target="_blank" class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:0.5rem;">Public Site ↗</a>
-        <button id="logout-btn" class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:0.5rem; color:#F87171; border-color:rgba(239,68,68,0.3);">Sign Out</button>
-      </div>
+      <div style="display:flex; gap:0.5rem;"><a href="/" target="_blank" class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:0.5rem;">Public Site ↗</a><button id="logout-btn" class="btn btn-secondary" style="flex:1; font-size:0.75rem; padding:0.5rem; color:#F87171; border-color:rgba(239,68,68,0.3);">Sign Out</button></div>
     </div>
   </aside>
 
-  <!-- Main Work Area -->
   <main class="admin-main">
     <header class="admin-topbar">
-      <div>
-        <h2 style="font-size: 1.25rem; font-weight: 700; color: #FFFFFF;" id="tab-title">Live Anonymous Activity</h2>
-        <p style="font-size: 0.78rem; color: var(--admin-text-sub);" id="tab-subtitle">Real-time first-party visitor sessions and touchpoint telemetry (Zero PII)</p>
-      </div>
-
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <span class="user-role-tag" id="user-role">Administrator</span>
-        <button id="refresh-data-btn" class="btn btn-secondary" style="font-size: 0.78rem; padding: 0.5rem 0.85rem;">↻ Sync Live</button>
-      </div>
+      <div><h2 style="font-size: 1.25rem; font-weight: 700; color: #FFFFFF;" id="tab-title">Live Anonymous Activity</h2><p style="font-size: 0.78rem; color: var(--admin-text-sub);" id="tab-subtitle">Real-time first-party visitor sessions and touchpoint telemetry (Zero PII)</p></div>
+      <div style="display: flex; align-items: center; gap: 1rem;"><span class="user-role-tag" id="user-role">Administrator</span><button id="refresh-data-btn" class="btn btn-secondary" style="font-size: 0.78rem; padding: 0.5rem 0.85rem;">↻ Sync Live</button></div>
     </header>
 
     <div class="admin-content-scroll">
-      
-      <!-- ==============================================
-           TAB 1: LIVE ACTIVITY MONITOR
-           ============================================== -->
       <section class="admin-tab-view active" id="tab-live">
         <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-title">Active Anonymous Sessions (Last 30m)</div>
-            <div class="kpi-value" id="live-session-count">0</div>
-            <div class="kpi-trend">● Live streaming telemetry</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Total Tracked Events</div>
-            <div class="kpi-value" id="kpi-total-events">0</div>
-            <div class="kpi-trend">Non-PII business interactions</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Avg Session Dwell Time</div>
-            <div class="kpi-value" id="kpi-avg-dwell">2.4m</div>
-            <div class="kpi-trend">Deep engagement on capabilities</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Consent Grant Rate</div>
-            <div class="kpi-value">94.8%</div>
-            <div class="kpi-trend">Transparent GDPR / CCPA posture</div>
-          </div>
+          <div class="kpi-card"><div class="kpi-title">Active Anonymous Sessions (Last 30m)</div><div class="kpi-value" id="live-session-count">0</div><div class="kpi-trend">● Live streaming telemetry</div></div>
+          <div class="kpi-card"><div class="kpi-title">Total Tracked Events</div><div class="kpi-value" id="kpi-total-events">0</div><div class="kpi-trend">Non-PII business interactions</div></div>
+          <div class="kpi-card"><div class="kpi-title">Avg Session Dwell Time</div><div class="kpi-value" id="kpi-avg-dwell">2.4m</div><div class="kpi-trend">Deep engagement on capabilities</div></div>
+          <div class="kpi-card"><div class="kpi-title">Consent Grant Rate</div><div class="kpi-value">94.8%</div><div class="kpi-trend">Transparent GDPR / CCPA posture</div></div>
         </div>
-
-        <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">Active Visitor Registry</h3>
-          <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Auto-refreshes every 15s</span>
-        </div>
-
-        <table class="live-session-table">
-          <thead>
-            <tr>
-              <th>Visitor Token</th>
-              <th>Current Page / Path</th>
-              <th>Region</th>
-              <th>Device & Browser</th>
-              <th>Dwell Time</th>
-              <th>Events</th>
-              <th>Last Touchpoint</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="live-sessions-tbody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
+        <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;"><h3 style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">Active Visitor Registry</h3><span style="font-size: 0.75rem; color: var(--admin-text-muted);">Auto-refreshes every 15s</span></div>
+        <table class="live-session-table"><thead><tr><th>Visitor Token</th><th>Current Page / Path</th><th>Region</th><th>Device & Browser</th><th>Dwell Time</th><th>Events</th><th>Last Touchpoint</th><th>Status</th></tr></thead><tbody id="live-sessions-tbody"></tbody></table>
       </section>
 
-      <!-- ==============================================
-           TAB 2: CRM PIPELINE (KANBAN & DOSSIER)
-           ============================================== -->
       <section class="admin-tab-view" id="tab-crm">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;">
-          <div>
-            <h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 700;">Executive Inquiries & Support Squads</h3>
-            <p style="font-size: 0.8rem; color: var(--admin-text-sub);">Track prospective enterprise partnerships from voluntary submission through squad deployment</p>
-          </div>
-          <div style="display:flex; gap:0.5rem;">
-            <button class="btn btn-secondary" id="export-leads-btn" style="font-size:0.78rem; padding:0.5rem 0.85rem;">Export CSV</button>
-          </div>
-        </div>
-
-        <!-- Kanban Stages -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1.5rem;"><div><h3 style="font-size: 1.2rem; color: #FFFFFF; font-weight: 700;">Executive Inquiries & Support Squads</h3><p style="font-size: 0.8rem; color: var(--admin-text-sub);">Track prospective enterprise partnerships from voluntary submission through squad deployment</p></div><div style="display:flex; gap:0.5rem;"><button class="btn btn-secondary" id="export-leads-btn" style="font-size:0.78rem; padding:0.5rem 0.85rem;">Export CSV</button></div></div>
         <div class="kanban-board">
-          <!-- Col: New -->
-          <div class="kanban-col" data-stage="New">
-            <div class="kanban-col-header">
-              <span class="kanban-col-title">New Inquiries</span>
-              <span class="kanban-col-count" id="count-New">0</span>
-            </div>
-            <div class="kanban-cards-container" id="cards-New"></div>
-          </div>
-
-          <!-- Col: Contacted -->
-          <div class="kanban-col" data-stage="Contacted">
-            <div class="kanban-col-header">
-              <span class="kanban-col-title">Contacted</span>
-              <span class="kanban-col-count" id="count-Contacted">0</span>
-            </div>
-            <div class="kanban-cards-container" id="cards-Contacted"></div>
-          </div>
-
-          <!-- Col: Qualified -->
-          <div class="kanban-col" data-stage="Qualified">
-            <div class="kanban-col-header">
-              <span class="kanban-col-title">Qualified</span>
-              <span class="kanban-col-count" id="count-Qualified">0</span>
-            </div>
-            <div class="kanban-cards-container" id="cards-Qualified"></div>
-          </div>
-
-          <!-- Col: Proposal -->
-          <div class="kanban-col" data-stage="Proposal">
-            <div class="kanban-col-header">
-              <span class="kanban-col-title">Proposal / Scoping</span>
-              <span class="kanban-col-count" id="count-Proposal">0</span>
-            </div>
-            <div class="kanban-cards-container" id="cards-Proposal"></div>
-          </div>
-
-          <!-- Col: Won -->
-          <div class="kanban-col" data-stage="Won">
-            <div class="kanban-col-header">
-              <span class="kanban-col-title">Deployed / Won</span>
-              <span class="kanban-col-count" id="count-Won">0</span>
-            </div>
-            <div class="kanban-cards-container" id="cards-Won"></div>
-          </div>
+          <div class="kanban-col" data-stage="New"><div class="kanban-col-header"><span class="kanban-col-title">New Inquiries</span><span class="kanban-col-count" id="count-New">0</span></div><div class="kanban-cards-container" id="cards-New"></div></div>
+          <div class="kanban-col" data-stage="Contacted"><div class="kanban-col-header"><span class="kanban-col-title">Contacted</span><span class="kanban-col-count" id="count-Contacted">0</span></div><div class="kanban-cards-container" id="cards-Contacted"></div></div>
+          <div class="kanban-col" data-stage="Qualified"><div class="kanban-col-header"><span class="kanban-col-title">Qualified</span><span class="kanban-col-count" id="count-Qualified">0</span></div><div class="kanban-cards-container" id="cards-Qualified"></div></div>
+          <div class="kanban-col" data-stage="Proposal"><div class="kanban-col-header"><span class="kanban-col-title">Proposal / Scoping</span><span class="kanban-col-count" id="count-Proposal">0</span></div><div class="kanban-cards-container" id="cards-Proposal"></div></div>
+          <div class="kanban-col" data-stage="Won"><div class="kanban-col-header"><span class="kanban-col-title">Deployed / Won</span><span class="kanban-col-count" id="count-Won">0</span></div><div class="kanban-cards-container" id="cards-Won"></div></div>
         </div>
       </section>
 
-      <!-- ==============================================
-           TAB 3: VISITOR & LEAD INTELLIGENCE
-           ============================================== -->
-      <section class="admin-tab-view" id="tab-analytics">
-        <div class="kpi-grid">
-          <div class="kpi-card">
-            <div class="kpi-title">All-Time Visitor Sessions</div>
-            <div class="kpi-value" id="intel-total-sessions">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Active in Last 24 Hours</div>
-            <div class="kpi-value" id="intel-24h-sessions">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Qualified Lead Inquiries</div>
-            <div class="kpi-value" id="intel-total-leads">0</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-title">Executive Conversion Rate</div>
-            <div class="kpi-value" id="intel-conv-rate">0%</div>
-          </div>
-        </div>
+      <section class="admin-tab-view" id="tab-analytics"><div class="kpi-grid"><div class="kpi-card"><div class="kpi-title">All-Time Visitor Sessions</div><div class="kpi-value" id="intel-total-sessions">0</div></div><div class="kpi-card"><div class="kpi-title">Active in Last 24 Hours</div><div class="kpi-value" id="intel-24h-sessions">0</div></div><div class="kpi-card"><div class="kpi-title">Qualified Lead Inquiries</div><div class="kpi-value" id="intel-total-leads">0</div></div><div class="kpi-card"><div class="kpi-title">Executive Conversion Rate</div><div class="kpi-value" id="intel-conv-rate">0%</div></div></div><div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-top:2rem;"><div class="cms-editor-panel"><h3>Top Explored Industries</h3><p>Sectors generating the highest user dwell time and interest</p><div id="intel-top-industries" style="display:flex; flex-direction:column; gap:0.75rem;"></div></div><div class="cms-editor-panel"><h3>Top Capability Orbits</h3><p>Operational disciplines evaluated most frequently</p><div id="intel-top-capabilities" style="display:flex; flex-direction:column; gap:0.75rem;"></div></div></div></section>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-top:2rem;">
-          <div class="cms-editor-panel">
-            <h3>Top Explored Industries</h3>
-            <p>Sectors generating the highest user dwell time and interest</p>
-            <div id="intel-top-industries" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
-          </div>
+      <section class="admin-tab-view" id="tab-cms"><div class="cms-editor-panel"><h3>Homepage Manifesto & Hero Studio</h3><p>Control main branding headlines, supporting manifesto, and primary calls to action</p><form id="cms-hero-form"><div class="form-group" style="margin-bottom: 1rem;"><label class="form-label">Headline</label><input type="text" id="cms-hero-title" class="form-input" value="THE PEOPLE BEHIND BUSINESS."></div><div class="form-group" style="margin-bottom: 1.5rem;"><label class="form-label">Supporting Manifesto</label><textarea id="cms-hero-subtitle" class="form-textarea" rows="3">From everyday operations to specialized support, Assista gives businesses the people they need to move forward.</textarea></div><button type="submit" class="btn btn-primary" style="font-size:0.85rem;">Save Hero Content</button></form></div><div class="cms-editor-panel"><h3>Capability Universe (15 Managed Services)</h3><p>Modify scope, deliverables, and SLAs across People, Operations, Growth, and Specialized Support</p><div id="cms-services-list"></div></div></section>
 
-          <div class="cms-editor-panel">
-            <h3>Top Capability Orbits</h3>
-            <p>Operational disciplines evaluated most frequently</p>
-            <div id="intel-top-capabilities" style="display:flex; flex-direction:column; gap:0.75rem;"></div>
-          </div>
-        </div>
-      </section>
+      <section class="admin-tab-view" id="tab-seo"><div class="cms-editor-panel"><h3>Corporate Settings & Turnstile Configuration</h3><p>Manage sales notification recipients, global headquarters, and Cloudflare keys</p><form id="settings-form"><div class="form-grid"><div class="form-group"><label class="form-label">Sales Mailbox</label><input type="email" id="set-sales-email" class="form-input" value="sales@assistacorp.com"></div><div class="form-group"><label class="form-label">Direct Client Line</label><input type="text" id="set-phone" class="form-input" value="+1 (800) 492-7718"></div><div class="form-group form-group-full"><label class="form-label">New York Headquarters</label><input type="text" id="set-hq" class="form-input" value="350 Fifth Avenue, 54th Floor, New York, NY 10118"></div><div class="form-group form-group-full"><label class="form-label">Cloudflare Turnstile Public Site Key</label><input type="text" id="set-turnstile-key" class="form-input" value="1x00000000000000000000AA"></div></div><button type="submit" class="btn btn-primary" style="font-size:0.85rem; margin-top:1rem;">Save Corporate Settings</button></form></div></section>
 
-      <!-- ==============================================
-           TAB 4: CMS STUDIO
-           ============================================== -->
-      <section class="admin-tab-view" id="tab-cms">
-        <div class="cms-editor-panel">
-          <h3>Homepage Manifesto & Hero Studio</h3>
-          <p>Control main branding headlines, supporting manifesto, and primary calls to action</p>
-          
-          <form id="cms-hero-form">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label class="form-label">Headline</label>
-              <input type="text" id="cms-hero-title" class="form-input" value="THE PEOPLE BEHIND BUSINESS.">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label class="form-label">Supporting Manifesto</label>
-              <textarea id="cms-hero-subtitle" class="form-textarea" rows="3">From everyday operations to specialized support, Assista gives businesses the people they need to move forward.</textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="font-size:0.85rem;">Save Hero Content</button>
-          </form>
-        </div>
-
-        <div class="cms-editor-panel">
-          <h3>Capability Universe (15 Managed Services)</h3>
-          <p>Modify scope, deliverables, and SLAs across People, Operations, Growth, and Specialized Support</p>
-          <div id="cms-services-list">
-            <!-- Dynamically populated -->
-          </div>
-        </div>
-      </section>
-
-      <!-- ==============================================
-           TAB 5: SEO METADATA & COMPANY SETTINGS
-           ============================================== -->
-      <section class="admin-tab-view" id="tab-seo">
-        <div class="cms-editor-panel">
-          <h3>Corporate Settings & Turnstile Configuration</h3>
-          <p>Manage sales notification recipients, global headquarters, and Cloudflare keys</p>
-
-          <form id="settings-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label class="form-label">Sales Mailbox</label>
-                <input type="email" id="set-sales-email" class="form-input" value="sales@assistacorp.com">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Direct Client Line</label>
-                <input type="text" id="set-phone" class="form-input" value="+1 (800) 492-7718">
-              </div>
-              <div class="form-group form-group-full">
-                <label class="form-label">New York Headquarters</label>
-                <input type="text" id="set-hq" class="form-input" value="350 Fifth Avenue, 54th Floor, New York, NY 10118">
-              </div>
-              <div class="form-group form-group-full">
-                <label class="form-label">Cloudflare Turnstile Public Site Key</label>
-                <input type="text" id="set-turnstile-key" class="form-input" value="1x00000000000000000000AA">
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary" style="font-size:0.85rem; margin-top:1rem;">Save Corporate Settings</button>
-          </form>
-        </div>
-      </section>
-
-      <!-- ==============================================
-           TAB 6: SECURITY & AUDIT TRAIL
-           ============================================== -->
-      <section class="admin-tab-view" id="tab-audit">
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-bottom: 2rem;">
-          <div class="cms-editor-panel">
-            <h3>Multi-Factor Authentication (MFA)</h3>
-            <p>Enhance administrative security with RFC 6238 TOTP authentication.</p>
-            <div id="mfa-status-box" style="margin-bottom:1.25rem;">
-              <span style="font-size:0.85rem; color:#22C55E;">✓ MFA Active & Enforced</span>
-            </div>
-            <button class="btn btn-secondary" id="setup-mfa-btn" style="font-size:0.8rem;">Reconfigure 2FA Secret</button>
-          </div>
-
-          <div class="cms-editor-panel">
-            <h3>Security Posture & Rate Limiting</h3>
-            <p>Active security controls safeguarding this backend instance</p>
-            <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; font-size:0.82rem; color:#D2D0C8;">
-              <li>✓ PBKDF2 Password Encryption (100k Iterations, Salted)</li>
-              <li>✓ HTTP-Only Signed Session Cookies (SameSite=Lax)</li>
-              <li>✓ IP Sliding Window Rate Limiting (Brute-force protection)</li>
-              <li>✓ Zero PII Visitor Logging with Compartmentalized DB</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;">
-          <h3 style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">System Audit Logs</h3>
-          <span style="font-size: 0.75rem; color: var(--admin-text-muted);">Tamper-evident operations trail</span>
-        </div>
-
-        <table class="audit-table">
-          <thead>
-            <tr>
-              <th>Timestamp</th>
-              <th>Operator</th>
-              <th>Action</th>
-              <th>Entity</th>
-              <th>IP Address</th>
-              <th>Details</th>
-            </tr>
-          </thead>
-          <tbody id="audit-logs-tbody">
-            <!-- Dynamically populated -->
-          </tbody>
-        </table>
-      </section>
-
+      <section class="admin-tab-view" id="tab-audit"><div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-bottom: 2rem;"><div class="cms-editor-panel"><h3>Multi-Factor Authentication (MFA)</h3><p>Enhance administrative security with RFC 6238 TOTP authentication.</p><div id="mfa-status-box" style="margin-bottom:1.25rem;"><span style="font-size:0.85rem; color:#22C55E;">✓ MFA Active & Enforced</span></div><button class="btn btn-secondary" id="setup-mfa-btn" style="font-size:0.8rem;">Reconfigure 2FA Secret</button></div><div class="cms-editor-panel"><h3>Security Posture & Rate Limiting</h3><p>Active security controls safeguarding this backend instance</p><ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem; font-size:0.82rem; color:#D2D0C8;"><li>✓ PBKDF2 Password Encryption (310k Iterations, Salted)</li><li>✓ HTTP-Only Session Cookies (SameSite=Lax)</li><li>✓ IP Sliding Window Rate Limiting (Brute-force protection)</li><li>✓ Zero PII Visitor Logging with Compartmentalized DB</li><li>✓ CSRF Protection on Authenticated Mutations</li><li>✓ Cloudflare Turnstile Server Verification on Leads</li></ul></div></div><div style="margin-bottom: 1rem; display:flex; justify-content:space-between; align-items:center;"><h3 style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">System Audit Logs</h3><span style="font-size: 0.75rem; color: var(--admin-text-muted);">Tamper-evident operations trail</span></div><table class="audit-table"><thead><tr><th>Timestamp</th><th>Operator</th><th>Action</th><th>Entity</th><th>IP Address</th><th>Details</th></tr></thead><tbody id="audit-logs-tbody"></tbody></table></section>
     </div>
   </main>
 
-  <!-- Lead Dossier Modal Dialog -->
-  <div class="lead-modal-overlay" id="lead-dossier-modal">
-    <div class="lead-dossier-card">
-      <button class="modal-close-btn" id="dossier-close-btn">&times;</button>
-      
-      <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--admin-border); padding-bottom:1.5rem; margin-bottom:1.5rem;">
-        <div>
-          <span class="user-role-tag" id="dossier-tier" style="margin-bottom:0.5rem; display:inline-block;">Hot Intent</span>
-          <h3 style="font-family:'Instrument Serif', Georgia, serif; font-size:2.2rem; color:#FFF;" id="dossier-company">Company Name</h3>
-          <p style="font-size:0.88rem; color:var(--admin-text-sub);" id="dossier-contact">Name (name@company.com)</p>
-        </div>
+  <div class="lead-modal-overlay" id="lead-dossier-modal"><div class="lead-dossier-card"><button class="modal-close-btn" id="dossier-close-btn">&times;</button><div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--admin-border); padding-bottom:1.5rem; margin-bottom:1.5rem;"><div><span class="user-role-tag" id="dossier-tier" style="margin-bottom:0.5rem; display:inline-block;">Hot Intent</span><h3 style="font-family:'Instrument Serif', Georgia, serif; font-size:2.2rem; color:#FFF;" id="dossier-company">Company Name</h3><p style="font-size:0.88rem; color:var(--admin-text-sub);" id="dossier-contact">Name (name@company.com)</p></div><div style="text-align:right;"><label style="font-size:0.75rem; color:var(--admin-text-muted); display:block; margin-bottom:0.25rem;">Pipeline Status</label><select id="dossier-status-select" class="form-select" style="font-size:0.85rem; padding:0.5rem 1rem;"><option value="New">New</option><option value="Contacted">Contacted</option><option value="Qualified">Qualified</option><option value="Proposal">Proposal</option><option value="Won">Won / Deployed</option><option value="Lost">Lost</option></select></div></div><div style="background:rgba(255,255,255,0.02); border:1px solid var(--admin-border); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;"><h5 style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--admin-accent); margin-bottom:0.5rem;">Configured Support Squad Architecture</h5><div id="dossier-squad-details" style="font-size:0.85rem; color:#FFFFFF;"></div><div id="dossier-message-box" style="margin-top:0.75rem; font-size:0.82rem; color:var(--admin-text-sub); border-top:1px solid rgba(255,255,255,0.05); padding-top:0.75rem;"></div></div><div style="margin-bottom:1.5rem;"><h4 style="font-size:0.95rem; color:#FFFFFF; margin-bottom:0.5rem;">Visitor Activity & Attribution Timeline</h4><p style="font-size:0.78rem; color:var(--admin-text-muted);">Non-invasive first-party touchpoints prior to voluntary form submission</p><div class="timeline-feed" id="dossier-timeline-feed"></div></div><div><h4 style="font-size:0.95rem; color:#FFFFFF; margin-bottom:0.75rem;">Internal Operations Notes</h4><div id="dossier-notes-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div><div style="display:flex; gap:0.5rem;"><input type="text" id="new-note-input" class="form-input" placeholder="Add confidential notes on discovery call, budget, or squad requirements..." style="flex:1;"><button class="btn btn-primary" id="save-note-btn" style="font-size:0.82rem;">Add Note</button></div></div></div></div>
 
-        <div style="text-align:right;">
-          <label style="font-size:0.75rem; color:var(--admin-text-muted); display:block; margin-bottom:0.25rem;">Pipeline Status</label>
-          <select id="dossier-status-select" class="form-select" style="font-size:0.85rem; padding:0.5rem 1rem;">
-            <option value="New">New</option>
-            <option value="Contacted">Contacted</option>
-            <option value="Qualified">Qualified</option>
-            <option value="Proposal">Proposal</option>
-            <option value="Won">Won / Deployed</option>
-            <option value="Lost">Lost</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Squad Configuration & Requirements -->
-      <div style="background:rgba(255,255,255,0.02); border:1px solid var(--admin-border); border-radius:8px; padding:1.25rem; margin-bottom:1.5rem;">
-        <h5 style="font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--admin-accent); margin-bottom:0.5rem;">Configured Support Squad Architecture</h5>
-        <div id="dossier-squad-details" style="font-size:0.85rem; color:#FFFFFF;"></div>
-        <div id="dossier-message-box" style="margin-top:0.75rem; font-size:0.82rem; color:var(--admin-text-sub); border-top:1px solid rgba(255,255,255,0.05); padding-top:0.75rem;"></div>
-      </div>
-
-      <!-- Chronological Visitor Attribution Timeline -->
-      <div style="margin-bottom:1.5rem;">
-        <h4 style="font-size:0.95rem; color:#FFFFFF; margin-bottom:0.5rem;">Visitor Activity & Attribution Timeline</h4>
-        <p style="font-size:0.78rem; color:var(--admin-text-muted);">Non-invasive first-party touchpoints prior to voluntary form submission</p>
-        
-        <div class="timeline-feed" id="dossier-timeline-feed">
-          <!-- Dynamically populated -->
-        </div>
-      </div>
-
-      <!-- Internal Sales Notes -->
-      <div>
-        <h4 style="font-size:0.95rem; color:#FFFFFF; margin-bottom:0.75rem;">Internal Operations Notes</h4>
-        <div id="dossier-notes-list" style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;"></div>
-        
-        <div style="display:flex; gap:0.5rem;">
-          <input type="text" id="new-note-input" class="form-input" placeholder="Add confidential notes on discovery call, budget, or squad requirements..." style="flex:1;">
-          <button class="btn btn-primary" id="save-note-btn" style="font-size:0.82rem;">Add Note</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
+  <script src="/js/admin-security.js"></script>
   <script src="/js/admin.js"></script>
 </body>
 </html>
