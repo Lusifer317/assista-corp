@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASSISTA CORP | Operations Access & Authentication</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-primary, #F7F8F3);
+      padding: 1.5rem;
+    }
+    .auth-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-color, #E5E7EB);
+      border-radius: 16px;
+      padding: 3rem 2.5rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 10px 30px rgba(17, 24, 39, 0.05);
+    }
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .auth-alert {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      margin-bottom: 1.5rem;
+      display: none;
+    }
+    .auth-alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #DC2626;
+    }
+    .auth-alert.info {
+      background: rgba(23, 37, 84, 0.06);
+      border: 1px solid rgba(23, 37, 84, 0.15);
+      color: var(--brand-navy, #172554);
+    }
+    .demo-credentials {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border-color, #E5E7EB);
+      font-size: 0.75rem;
+      color: var(--text-secondary, #5B6472);
+      line-height: 1.6;
+    }
+    .demo-credentials code {
+      color: var(--brand-navy, #172554);
+      background: var(--bg-subtle, #EEF0EA);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body class="auth-page">
+
+  <div class="auth-card">
+    <div class="auth-brand">
+      <a href="/" title="Assista Corp" style="display:inline-block;">
+        <picture>
+          <source srcset="/images/assista-logo.svg" type="image/svg+xml">
+          <img src="/images/assista-logo.png" alt="Assista Corp" style="height: 48px; width: auto; margin: 0 auto; display: block;">
+        </picture>
+      </a>
+      <div class="brand-tagline" style="font-size:0.75rem; color:var(--text-secondary, #5B6472); font-weight:600; text-transform:uppercase; letter-spacing:0.06em; margin-top:0.75rem;">Operations Command &amp; CRM</div>
+    </div>
+
+    <div id="auth-alert" class="auth-alert"></div>
+
+    <form id="login-form">
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label" for="email">Authorized Email</label>
+        <input type="email" id="email" name="email" class="form-input" required value="admin@assistacorp.com" placeholder="name@assistacorp.com">
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" required value="Assista2026!Secured" placeholder="••••••••••••">
+      </div>
+
+      <!-- MFA OTP prompt field -->
+      <div class="form-group" id="mfa-group" style="display:none; margin-bottom: 1.25rem;">
+        <label class="form-label" for="totp_code">Authenticator 6-Digit Code (2FA)</label>
+        <input type="text" id="totp_code" name="totp_code" class="form-input" maxlength="6" value="123456" placeholder="123456" style="letter-spacing: 0.25em; text-align: center; font-size: 1.2rem; font-weight: 700; color: var(--brand-navy, #172554);">
+        <span style="font-size: 0.75rem; color: var(--text-secondary, #5B6472); margin-top: 0.35rem; display: block;">
+          Demo 2FA Code: <strong>123456</strong> (or code from Google Authenticator / 1Password).
+        </span>
+      </div>
+
+      <button type="submit" id="login-btn" class="btn btn-navy" style="width: 100%; padding: 0.85rem; font-size: 0.92rem; margin-top: 0.5rem;">
+        Authenticate into Operations →
+      </button>
+    </form>
+
+    <div class="demo-credentials">
+      <strong>Operations Access:</strong><br>
+      • Admin: <code>admin@assistacorp.com</code> (Pass: <code>Assista2026!Secured</code>, 2FA: <code>123456</code>)<br>
+      • Editor: <code>editor@assistacorp.com</code> (Pass: <code>Assista2026!Editor</code> — No 2FA required)<br>
+      • Sales: <code>sales@assistacorp.com</code> (Pass: <code>Assista2026!Sales</code> — No 2FA required)<br>
+      <a href="/" style="display:inline-block; margin-top:0.75rem; color:var(--brand-navy, #172554); font-weight:600;">← Return to Public Experience</a>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById('login-form');
+    const authAlert = document.getElementById('auth-alert');
+    const mfaGroup = document.getElementById('mfa-group');
+    const loginBtn = document.getElementById('login-btn');
+
+    function showAlert(text, type = 'error') {
+      authAlert.textContent = text;
+      authAlert.className = `auth-alert ${type}`;
+      authAlert.style.display = 'block';
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Verifying credentials...';
+      authAlert.style.display = 'none';
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const totp_code = document.getElementById('totp_code').value.trim();
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, totp_code })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          if (data.mfa_required) {
+            mfaGroup.style.display = 'block';
+            showAlert('Multi-factor authentication required. Please enter your 6-digit TOTP code.', 'info');
+            loginBtn.disabled = false;
+            loginBtn.textContent = 'Verify 2FA & Sign In →';
+            document.getElementById('totp_code').focus();
+            return;
+          }
+
+          loginBtn.textContent = 'Redirecting to Operations Portal...';
+          window.location.href = '/admin';
+        } else {
+          showAlert(data.error || 'Authentication failed. Please check credentials.');
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Authenticate into Operations →';
+        }
+      } catch (err) {
+        showAlert('Network or connection error. Please try again.');
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Authenticate into Operations →';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+/**
+ * ASSISTA CORP — Purposeful Motion Graphics & Business Workflow Animations
+ * "The People Behind Business."
+ * 
+ * Visual Language:
+ * - Deep navy (#172554)
+ * - Accent lime (#B8F000)
+ * - Warm white (#FFFFFF / #F7F8F3)
+ * - Clean geometric SVG lines
+ * - Restrained, looping micro-interactions (6–8s duration)
+ */
+
+/* ==========================================================================
+   1. CINEMATIC AMBIENT MOTION & VIDEO STYLING
+   ========================================================================== */
+
+.hero-cinematic-video,
+.why-assista-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* Subtle ambient cinemagraph drift (Ken Burns effect) */
+.ambient-cinematic {
+  animation: ambientDrift 16s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes ambientDrift {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.035) translate(-4px, -3px);
+  }
+  100% {
+    transform: scale(1.02) translate(3px, 2px);
+  }
+}
+
+/* Pause drift on user hover to allow close inspection */
+.hero-editorial-frame:hover .ambient-cinematic,
+.editorial-photo-card:hover .ambient-cinematic {
+  animation-play-state: paused;
+}
+
+/* ==========================================================================
+   2. SERVICE WORKFLOW MOTION VISUALS (SVG & CSS MICRO-LOOPS)
+   ========================================================================== */
+
+.service-workflow-viz {
+  margin: 1.25rem 0 1.5rem 0;
+  padding: 1rem 1.15rem;
+  background-color: var(--brand-bg);
+  border: 1px solid rgba(23, 37, 84, 0.08);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+
+.workflow-viz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.workflow-viz-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--brand-navy);
+  text-transform: uppercase;
+}
+
+.workflow-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #15803d;
+  letter-spacing: 0.04em;
+}
+
+.workflow-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  animation: pulseDot 2s infinite;
+}
+
+/* Interactive SVG Workflow Track */
+.workflow-track-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Traveling pulse animation along connecting workflow paths */
+@keyframes flowPulse {
+  0% {
+    stroke-dashoffset: 120;
+    opacity: 0.2;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.2;
+  }
+}
+
+.path-track {
+  stroke: #CBD5E1;
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.path-flowing {
+  stroke: var(--brand-navy);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 20 80;
+  animation: flowPulse 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  fill: none;
+}
+
+.path-flowing-lime {
+  stroke: var(--brand-lime);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 15 65;
+  animation: flowPulse 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  fill: none;
+}
+
+/* Node Step Transitions */
+.node-circle {
+  fill: #FFFFFF;
+  stroke: #CBD5E1;
+  stroke-width: 2;
+  transition: all 0.35s ease;
+}
+
+.node-circle-active {
+  fill: var(--brand-navy);
+  stroke: var(--brand-navy);
+}
+
+.node-icon {
+  fill: none;
+  stroke: var(--brand-navy);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.35s ease;
+}
+
+.node-circle-active + .node-icon,
+.node-circle-active ~ text {
+  stroke: var(--brand-lime);
+  fill: #FFFFFF;
+}
+
+.node-text {
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--brand-navy);
+  letter-spacing: 0.02em;
+}
+
+.node-subtext {
+  font-family: var(--font-family);
+  font-size: 8px;
+  font-weight: 500;
+  fill: var(--text-secondary);
+}
+
+/* Step Sequenced Highlights */
+@keyframes stepHighlight1 {
+  0%, 100% { opacity: 0.4; }
+  10%, 40% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes stepHighlight2 {
+  0%, 25% { opacity: 0.4; }
+  35%, 65% { opacity: 1; }
+  75%, 100% { opacity: 0.4; }
+}
+
+@keyframes stepHighlight3 {
+  0%, 50% { opacity: 0.4; }
+  60%, 90% { opacity: 1; }
+  95%, 100% { opacity: 0.4; }
+}
+
+@keyframes stepHighlight4 {
+  0%, 70% { opacity: 0.4; }
+  80%, 98% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+.anim-step-1 {
+  animation: stepHighlight1 6s infinite;
+}
+
+.anim-step-2 {
+  animation: stepHighlight2 6s infinite;
+}
+
+.anim-step-3 {
+  animation: stepHighlight3 6s infinite;
+}
+
+.anim-step-4 {
+  animation: stepHighlight4 6s infinite;
+}
+
+/* ==========================================================================
+   3. "HOW WE WORK" CONNECTED PROCESS PROGRESSION GLOW
+   ========================================================================== */
+
+.process-track-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--brand-navy) 0%, #1e3a8a 70%, var(--brand-lime) 100%);
+  box-shadow: 0 0 10px rgba(184, 240, 0, 0.4);
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.process-step-node.step-active .process-node-indicator {
+  background-color: var(--brand-navy);
+  border-color: var(--brand-lime);
+  box-shadow: 0 0 0 4px rgba(184, 240, 0, 0.25), 0 8px 20px rgba(23, 37, 84, 0.2);
+}
+
+.process-step-node.step-active .process-node-num {
+  color: var(--brand-lime);
+}
+
+/* ==========================================================================
+   4. ACCESSIBILITY: PREFERS-REDUCED-MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-cinematic,
+  .path-flowing,
+  .path-flowing-lime,
+  .anim-step-1,
+  .anim-step-2,
+  .anim-step-3,
+  .anim-step-4,
+  .workflow-pulse-dot {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .path-flowing,
+  .path-flowing-lime {
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+
+  .process-track-progress {
+    width: 100% !important;
+    transition: none !important;
+  }
+}

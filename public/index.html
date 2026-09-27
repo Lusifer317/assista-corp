@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASSISTA CORP | The People Behind Business.</title>
+  <meta name="description" content="Assista Corp provides dedicated human operational infrastructure for executive support, finance, customer care, and specialized business operations.">
+  <link rel="canonical" href="https://assistacorp.com">
+  
+  <!-- Open Graph Metadata -->
+  <meta property="og:site_name" content="Assista Corp">
+  <meta property="og:title" content="ASSISTA CORP | The People Behind Business.">
+  <meta property="og:description" content="Assista Corp provides dedicated human operational infrastructure for executive support, finance, customer care, and specialized business operations.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://assistacorp.com">
+  <meta property="og:image" content="https://assistacorp.com/images/assista-logo.png">
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#F7F8F3">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/motion-graphics.css">
+  
+</head>
+<body>
+  
+  <!-- Minimal Scroll Progress Indicator -->
+  <div class="scroll-progress-track" aria-hidden="true">
+    <div class="scroll-progress-fill" id="scroll-progress-fill"></div>
+  </div>
+
+  <!-- SITE HEADER & NAVIGATION -->
+  <header class="site-header">
+    <div class="container nav-container">
+      <a href="/" class="brand-link" aria-label="Assista Corp Homepage">
+        <picture>
+          <source srcset="/images/assista-logo.svg" type="image/svg+xml">
+          <img src="/images/assista-logo.png" alt="Assista Corp — People | Operations | Progress" class="site-logo" width="250" height="44">
+        </picture>
+      </a>
+
+      <!-- 5-Item Navigation with Accessible Services Dropdown -->
+      <nav class="header-nav" aria-label="Main Navigation">
+        <ul class="nav-menu">
+          <li class="nav-item-dropdown">
+            <a href="/services" class="nav-link " id="services-menu-link" aria-haspopup="true" aria-expanded="false">
+              <span>Services</span>
+              <span class="dropdown-chevron" aria-hidden="true">▾</span>
+            </a>
+            <div class="nav-dropdown" aria-label="Services Submenu">
+              <a href="/services/executive-support" class="nav-dropdown-item ">
+                <span class="dropdown-item-title">Executive Support</span>
+                <span class="dropdown-item-desc">Workflow gatekeeping &amp; C-suite leverage</span>
+              </a>
+              <a href="/services/finance-reconciliation" class="nav-dropdown-item ">
+                <span class="dropdown-item-title">Finance &amp; Reconciliation</span>
+                <span class="dropdown-item-desc">AP/AR, billing breakdowns &amp; statement matching</span>
+              </a>
+              <a href="/services/customer-care" class="nav-dropdown-item ">
+                <span class="dropdown-item-title">Customer Care &amp; CX</span>
+                <span class="dropdown-item-desc">High-touch human care &amp; VIP escalation</span>
+              </a>
+              <a href="/services/recruitment-talent" class="nav-dropdown-item ">
+                <span class="dropdown-item-title">Recruitment &amp; Talent</span>
+                <span class="dropdown-item-desc">Active sourcing, screening &amp; scheduling</span>
+              </a>
+              <div class="dropdown-footer">
+                <a href="/services" class="dropdown-all-link">Explore all services &rarr;</a>
+              </div>
+            </div>
+          </li>
+          <li><a href="/industries" class="nav-link ">Industries</a></li>
+          <li><a href="/how-we-work" class="nav-link ">How We Work</a></li>
+          <li><a href="/about" class="nav-link ">About</a></li>
+          <li><a href="/how-we-work#insights" class="nav-link">Insights</a></li>
+        </ul>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="/contact" class="btn btn-primary desktop-header-cta">
+          <span>Talk to Assista</span>
+          <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <button class="mobile-toggle" id="mobile-toggle" aria-expanded="false" aria-controls="mobile-drawer" aria-label="Toggle navigation menu">
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Accessible Mobile Navigation Drawer (<= 900px) -->
+    <div class="mobile-drawer" id="mobile-drawer" aria-hidden="true">
+      <div class="mobile-drawer-content">
+        <ul class="mobile-nav-menu">
+          <li><a href="/services" class="mobile-nav-link ">Services</a></li>
+          <li><a href="/industries" class="mobile-nav-link ">Industries</a></li>
+          <li><a href="/how-we-work" class="mobile-nav-link ">How We Work</a></li>
+          <li><a href="/about" class="mobile-nav-link ">About</a></li>
+          <li><a href="/how-we-work#insights" class="mobile-nav-link">Insights</a></li>
+        </ul>
+        <div class="mobile-drawer-actions">
+          <a href="/contact" class="btn btn-primary mobile-drawer-btn">
+            <span>Talk to Assista</span>
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+
+  <main id="main-content">
+    
+    
+    <!-- HERO SECTION (STAGGERED ENTRANCE & FULL HERO CLEARANCE) -->
+    <section class="hero-section" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-text-col">
+          <span class="hero-eyebrow hero-stagger-1">Dedicated Human Operational Infrastructure</span>
+          <h1 class="hero-title hero-stagger-2">
+            <span class="hero-title-line"><span class="hero-title-text">Business operations,</span></span>
+            <span class="hero-title-line"><span class="hero-title-text navy">handled by people.</span></span>
+          </h1>
+          <p class="hero-lead hero-stagger-3">
+            Assista provides dedicated teams and specialist support that help businesses execute critical work with greater speed, consistency and reliability.
+          </p>
+
+          <div class="hero-cta-group hero-stagger-4">
+            <a href="/contact" class="btn btn-primary">
+              <span>Talk to Assista</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+            <a href="/services" class="btn-link">
+              <span>Explore our services</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+
+          <div class="hero-trust-metrics hero-stagger-5">
+            <div>
+              <div class="trust-item-value">Dedicated Teams</div>
+              <div class="trust-item-label">Direct Human Accountability</div>
+            </div>
+            <div>
+              <div class="trust-item-value">Structured Cells</div>
+              <div class="trust-item-label">Verified Operational Governance</div>
+            </div>
+            <div>
+              <div class="trust-item-value">Enterprise Continuity</div>
+              <div class="trust-item-label">Long-Term Knowledge Retention</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual-col hero-stagger-visual">
+          <div class="hero-editorial-frame">
+            <div class="hero-status-chip">
+              <span class="status-pulse-dot" aria-hidden="true"></span>
+              <span>OPERATIONS ACTIVE &bull; DEDICATED CELL</span>
+            </div>
+            <div class="hero-image-wrapper">
+              <video class="hero-cinematic-video ambient-cinematic" autoplay muted loop playsinline poster="/images/hero-operations-collab.jpg" aria-label="Assista Executive Operational Team in Command Center">
+                <source src="/videos/hero-operations.mp4" type="video/mp4">
+                <img src="/images/hero-operations-collab.jpg" alt="Assista Executive Operational Team Collaborating in Command Room" width="1024" height="768" loading="eager" class="hero-main-img">
+              </video>
+            </div>
+            <div class="hero-caption-bar">
+              <span class="hero-caption-badge">GLOBAL DELIVERY</span>
+              <span class="hero-caption-text">London &bull; Zurich &bull; Cross-Functional Coordination</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <!-- SECTION 2: WHAT ASSISTA DOES -->
+    <section class="section section-subtle" id="about-overview">
+      <div class="container reveal-on-scroll">
+        <div class="editorial-split-grid">
+          <div class="editorial-split-text">
+            <span class="section-tag">The Operational Model &bull; THE PEOPLE BEHIND BUSINESS.</span>
+            <h2 class="section-title">Operational infrastructure, powered by dedicated human cells.</h2>
+            <p class="section-desc">
+              We do not sell software subscriptions or impersonal ticket queues. Assista assembles and embeds dedicated operational cells into your business to handle critical workflows with precision, continuity, and accountability.
+            </p>
+
+            <div class="editorial-features-list">
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    <circle cx="20" cy="4" r="2.2" fill="#B8F000" stroke="#172554" stroke-width="1.2" class="icon-accent-lime" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Dedicated Talent</h3>
+                  <p class="feature-item-desc">Assigned specialists who know your business, your team's preferences, and your operating rhythm inside out.</p>
+                </div>
+              </div>
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 12 12 17 22 12" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <circle cx="12" cy="7" r="2.2" fill="#B8F000" stroke="#172554" stroke-width="1.2" class="icon-accent-lime" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Embedded Execution</h3>
+                  <p class="feature-item-desc">Operating directly within your existing communication and software stack—Slack, Notion, CRM, and cloud workspaces.</p>
+                </div>
+              </div>
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feature-icon-svg">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    <polyline points="9 12 11 14 15 10" />
+                    <circle cx="12" cy="6" r="2.2" fill="#B8F000" stroke="#172554" stroke-width="1.2" class="icon-accent-lime" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Structured Governance</h3>
+                  <p class="feature-item-desc">Documented standard operating procedures (SOPs) and client director oversight ensuring seamless operational continuity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="editorial-split-visual">
+            <div class="editorial-photo-card">
+              <div class="photo-card-img-wrapper">
+                <img src="/images/ops-candid-collab.jpg" alt="Assista Operational Specialists Collaborating on Workflow Architecture" width="800" height="600" loading="lazy" class="editorial-img">
+              </div>
+              <div class="photo-card-caption">
+                <span class="caption-tag">EMBEDDED CELL CADENCE</span>
+                <span class="caption-text">Specialists reviewing process documentation and live systems.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SERVICES OVERVIEW -->
+    <section class="section section-white" id="services">
+      <div class="container reveal-on-scroll">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3.5rem;">
+          <div style="max-width: 680px;">
+            <span class="section-tag">Core Capabilities &bull; WHATEVER MOVES YOUR BUSINESS FORWARD</span>
+            <h2 class="section-title">Specialized operational disciplines.</h2>
+            <p class="section-desc">
+              From executive workflows to financial administration and customer care, Assista provides dedicated specialists across high-leverage business functions.
+            </p>
+          </div>
+          <div>
+            <a href="/services" class="btn btn-navy">
+              <span>Explore all services</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="services-editorial-grid" style="margin-top: 0;">
+          <div class="service-card visual-service-card">
+            <div class="service-thumb-frame">
+              <img src="/images/service-exec.jpg" alt="Executive Support &amp; Operational Briefings" width="480" height="270" loading="lazy" class="service-thumb-img">
+              <span class="service-discipline-pill">Discipline 01</span>
+            </div>
+            <div class="service-card-body">
+              <div class="service-number">01 / CAPABILITY</div>
+              <h3 class="service-title">Executive Support</h3>
+              <p class="service-summary">
+                Dedicated support for executive workflows, dynamic calendar gatekeeping, complex travel coordination, and C-suite operational tasks.
+              </p>
+
+              <!-- Custom SVG Workflow Motion: Request → Coordination → Execution -->
+              <div class="service-workflow-viz">
+                <div class="workflow-viz-header">
+                  <span class="workflow-viz-label">Workflow: Request &rarr; Execution</span>
+                  <span class="workflow-status-indicator"><span class="workflow-pulse-dot"></span> Active Loop</span>
+                </div>
+                <svg class="workflow-track-svg" viewBox="0 0 340 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Request to Coordination to Execution workflow">
+                  <path d="M 45 22 L 170 22 L 295 22" class="path-track" />
+                  <path d="M 45 22 L 170 22 L 295 22" class="path-flowing" />
+                  <g class="anim-step-1">
+                    <circle cx="45" cy="22" r="12" class="node-circle node-circle-active" />
+                    <path d="M 40 22 L 44 26 L 50 18" stroke="#B8F000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <text x="45" y="44" text-anchor="middle" class="node-text">Request</text>
+                  </g>
+                  <g class="anim-step-2">
+                    <circle cx="170" cy="22" r="12" class="node-circle" />
+                    <circle cx="170" cy="22" r="3.5" fill="#172554" />
+                    <text x="170" y="44" text-anchor="middle" class="node-text">Coordination</text>
+                  </g>
+                  <g class="anim-step-3">
+                    <circle cx="295" cy="22" r="12" class="node-circle node-circle-active" />
+                    <path d="M 291 22 L 299 22 M 295 18 L 299 22 L 295 26" stroke="#B8F000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    <text x="295" y="44" text-anchor="middle" class="node-text">Execution</text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="service-card-action">
+                <span class="service-roles-pill">Senior Executive Assistants &bull; Chiefs of Staff</span>
+                <a href="/services/executive-support" class="btn-link">
+                  <span>Explore Executive Support</span>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-card visual-service-card">
+            <div class="service-thumb-frame">
+              <img src="/images/service-finance.jpg" alt="Finance &amp; Transactional Reconciliation Support" width="480" height="270" loading="lazy" class="service-thumb-img">
+              <span class="service-discipline-pill">Discipline 02</span>
+            </div>
+            <div class="service-card-body">
+              <div class="service-number">02 / CAPABILITY</div>
+              <h3 class="service-title">Finance &amp; Reconciliation</h3>
+              <p class="service-summary">
+                Rigorous financial hygiene, billing breakdowns, AP/AR oversight, and transactional tracking managed under strict confidentiality.
+              </p>
+
+              <!-- Custom SVG Workflow Motion: Documents → Verification → Reconciliation → Completed -->
+              <div class="service-workflow-viz">
+                <div class="workflow-viz-header">
+                  <span class="workflow-viz-label">Workflow: Audit &rarr; Completed</span>
+                  <span class="workflow-status-indicator"><span class="workflow-pulse-dot"></span> Verified</span>
+                </div>
+                <svg class="workflow-track-svg" viewBox="0 0 340 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Documents to Verification to Reconciliation to Completed workflow">
+                  <path d="M 35 22 L 120 22 L 210 22 L 305 22" class="path-track" />
+                  <path d="M 35 22 L 120 22 L 210 22 L 305 22" class="path-flowing-lime" />
+                  <g class="anim-step-1">
+                    <circle cx="35" cy="22" r="10" class="node-circle node-circle-active" />
+                    <text x="35" y="44" text-anchor="middle" class="node-text">Documents</text>
+                  </g>
+                  <g class="anim-step-2">
+                    <circle cx="120" cy="22" r="10" class="node-circle" />
+                    <circle cx="120" cy="22" r="3" fill="#172554" />
+                    <text x="120" y="44" text-anchor="middle" class="node-text">Verification</text>
+                  </g>
+                  <g class="anim-step-3">
+                    <circle cx="210" cy="22" r="10" class="node-circle" />
+                    <circle cx="210" cy="22" r="3" fill="#172554" />
+                    <text x="210" y="44" text-anchor="middle" class="node-text">Reconciliation</text>
+                  </g>
+                  <g class="anim-step-4">
+                    <circle cx="305" cy="22" r="10" class="node-circle node-circle-active" />
+                    <path d="M 301 22 L 304 25 L 309 19" stroke="#B8F000" stroke-width="1.8" stroke-linecap="round" />
+                    <text x="305" y="44" text-anchor="middle" class="node-text">Completed</text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="service-card-action">
+                <span class="service-roles-pill">Financial Administrators &bull; Reconciliation Leads</span>
+                <a href="/services/finance-reconciliation" class="btn-link">
+                  <span>Explore Finance &amp; Reconciliation</span>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-card visual-service-card">
+            <div class="service-thumb-frame">
+              <img src="/images/service-care.jpg" alt="Customer Care &amp; Human CX Operations" width="480" height="270" loading="lazy" class="service-thumb-img">
+              <span class="service-discipline-pill">Discipline 03</span>
+            </div>
+            <div class="service-card-body">
+              <div class="service-number">03 / CAPABILITY</div>
+              <h3 class="service-title">Customer Care &amp; CX</h3>
+              <p class="service-summary">
+                Empathic, brand-aligned human customer support and VIP escalation management delivered across global omnichannel touchpoints.
+              </p>
+
+              <!-- Custom SVG Workflow Motion: Customer Request → Support → Resolution -->
+              <div class="service-workflow-viz">
+                <div class="workflow-viz-header">
+                  <span class="workflow-viz-label">Workflow: Triage &rarr; Resolution</span>
+                  <span class="workflow-status-indicator"><span class="workflow-pulse-dot"></span> CSAT Verified</span>
+                </div>
+                <svg class="workflow-track-svg" viewBox="0 0 340 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Customer Request to Support to Resolution workflow">
+                  <path d="M 45 22 L 170 22 L 295 22" class="path-track" />
+                  <path d="M 45 22 L 170 22 L 295 22" class="path-flowing" />
+                  <g class="anim-step-1">
+                    <circle cx="45" cy="22" r="12" class="node-circle node-circle-active" />
+                    <text x="45" y="44" text-anchor="middle" class="node-text">Inquiry</text>
+                  </g>
+                  <g class="anim-step-2">
+                    <circle cx="170" cy="22" r="12" class="node-circle" />
+                    <circle cx="170" cy="22" r="3.5" fill="#172554" />
+                    <text x="170" y="44" text-anchor="middle" class="node-text">Support</text>
+                  </g>
+                  <g class="anim-step-3">
+                    <circle cx="295" cy="22" r="12" class="node-circle node-circle-active" />
+                    <path d="M 290 22 L 294 26 L 300 18" stroke="#B8F000" stroke-width="1.8" stroke-linecap="round" />
+                    <text x="295" y="44" text-anchor="middle" class="node-text">Resolution</text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="service-card-action">
+                <span class="service-roles-pill">CX Specialists &bull; Escalation Managers</span>
+                <a href="/services/customer-care" class="btn-link">
+                  <span>Explore Customer Care</span>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="service-card visual-service-card">
+            <div class="service-thumb-frame">
+              <img src="/images/service-talent.jpg" alt="Recruitment Operations &amp; Talent Coordination" width="480" height="270" loading="lazy" class="service-thumb-img">
+              <span class="service-discipline-pill">Discipline 04</span>
+            </div>
+            <div class="service-card-body">
+              <div class="service-number">04 / CAPABILITY</div>
+              <h3 class="service-title">Recruitment &amp; Talent</h3>
+              <p class="service-summary">
+                Full-cycle candidate sourcing, rubric-based screening, and interview coordination embedded directly inside your applicant tracking system.
+              </p>
+
+              <!-- Custom SVG Workflow Motion: Role → Sourcing → Screening → Candidate Pipeline -->
+              <div class="service-workflow-viz">
+                <div class="workflow-viz-header">
+                  <span class="workflow-viz-label">Workflow: Sourcing &rarr; Pipeline</span>
+                  <span class="workflow-status-indicator"><span class="workflow-pulse-dot"></span> Calibrated</span>
+                </div>
+                <svg class="workflow-track-svg" viewBox="0 0 340 50" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Role to Sourcing to Screening to Candidate Pipeline workflow">
+                  <path d="M 35 22 L 120 22 L 210 22 L 305 22" class="path-track" />
+                  <path d="M 35 22 L 120 22 L 210 22 L 305 22" class="path-flowing-lime" />
+                  <g class="anim-step-1">
+                    <circle cx="35" cy="22" r="10" class="node-circle node-circle-active" />
+                    <text x="35" y="44" text-anchor="middle" class="node-text">Role</text>
+                  </g>
+                  <g class="anim-step-2">
+                    <circle cx="120" cy="22" r="10" class="node-circle" />
+                    <circle cx="120" cy="22" r="3" fill="#172554" />
+                    <text x="120" y="44" text-anchor="middle" class="node-text">Sourcing</text>
+                  </g>
+                  <g class="anim-step-3">
+                    <circle cx="210" cy="22" r="10" class="node-circle" />
+                    <circle cx="210" cy="22" r="3" fill="#172554" />
+                    <text x="210" y="44" text-anchor="middle" class="node-text">Screening</text>
+                  </g>
+                  <g class="anim-step-4">
+                    <circle cx="305" cy="22" r="10" class="node-circle node-circle-active" />
+                    <path d="M 301 22 L 304 25 L 309 19" stroke="#B8F000" stroke-width="1.8" stroke-linecap="round" />
+                    <text x="305" y="44" text-anchor="middle" class="node-text">Pipeline</text>
+                  </g>
+                </svg>
+              </div>
+
+              <div class="service-card-action">
+                <span class="service-roles-pill">Talent Coordinators &bull; Sourcing Researchers</span>
+                <a href="/services/recruitment-talent" class="btn-link">
+                  <span>Explore Recruitment &amp; Talent</span>
+                  <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: INDUSTRIES OVERVIEW -->
+    <section class="section section-subtle" id="industries">
+      <div class="container reveal-on-scroll">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3.5rem;">
+          <div style="max-width: 680px;">
+            <span class="section-tag">Sectors &amp; Practice Areas</span>
+            <h2 class="section-title">Engineered for operationally demanding sectors.</h2>
+            <p class="section-desc">
+              We design industry-specific squads trained on the compliance, specialized software, and operating terminology unique to your sector.
+            </p>
+          </div>
+          <div>
+            <a href="/industries" class="btn btn-navy">
+              <span>Explore all industries</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="industries-visual-grid">
+          <a href="/industries#healthcare" class="industry-visual-card">
+            <div class="industry-card-visual">
+              <img src="/images/case-medical.jpg" alt="Healthcare &amp; Clinical Operations" width="600" height="450" loading="lazy" class="industry-card-img">
+              <div class="industry-card-overlay"></div>
+              <span class="industry-card-tag">SECTOR 01</span>
+            </div>
+            <div class="industry-card-content">
+              <h3 class="industry-card-title">Healthcare &amp; Clinical</h3>
+              <p class="industry-card-desc">Patient intake verification, appointment de-confliction, records transfer, and clinical document hygiene.</p>
+              <span class="industry-card-link">
+                <span>Explore practice</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </span>
+            </div>
+          </a>
+
+          <a href="/industries#wealth" class="industry-visual-card">
+            <div class="industry-card-visual">
+              <img src="/images/case-wealth.jpg" alt="Private Wealth &amp; Family Offices" width="600" height="450" loading="lazy" class="industry-card-img">
+              <div class="industry-card-overlay"></div>
+              <span class="industry-card-tag">SECTOR 02</span>
+            </div>
+            <div class="industry-card-content">
+              <h3 class="industry-card-title">Private Wealth Offices</h3>
+              <p class="industry-card-desc">Confidential fiduciary support, KYC/AML collation, custodial statement tracking, and partner briefing folders.</p>
+              <span class="industry-card-link">
+                <span>Explore practice</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </span>
+            </div>
+          </a>
+
+          <a href="/industries#legal" class="industry-visual-card">
+            <div class="industry-card-visual">
+              <img src="/images/case-legal.jpg" alt="Corporate Law Practices" width="600" height="450" loading="lazy" class="industry-card-img">
+              <div class="industry-card-overlay"></div>
+              <span class="industry-card-tag">SECTOR 03</span>
+            </div>
+            <div class="industry-card-content">
+              <h3 class="industry-card-title">Corporate Law Firms</h3>
+              <p class="industry-card-desc">Court filing deadline calendaring, deposition transcript indexing, discovery logging, and billing reconciliations.</p>
+              <span class="industry-card-link">
+                <span>Explore practice</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </span>
+            </div>
+          </a>
+
+          <a href="/industries#ecommerce" class="industry-visual-card">
+            <div class="industry-card-visual">
+              <img src="/images/case-commerce.jpg" alt="E-Commerce &amp; Global Brands" width="600" height="450" loading="lazy" class="industry-card-img">
+              <div class="industry-card-overlay"></div>
+              <span class="industry-card-tag">SECTOR 04</span>
+            </div>
+            <div class="industry-card-content">
+              <h3 class="industry-card-title">E-Commerce &amp; Brands</h3>
+              <p class="industry-card-desc">Round-the-clock human customer support, courier exception tracking, return authorizations, and catalog hygiene.</p>
+              <span class="industry-card-link">
+                <span>Explore practice</span>
+                <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+              </span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: HOW WE WORK OVERVIEW -->
+    <section class="section section-white" id="how-we-work">
+      <div class="container reveal-on-scroll">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 3.5rem;">
+          <div style="max-width: 680px;">
+            <span class="section-tag">The Assista Engagement Framework</span>
+            <h2 class="section-title">A structured path to operational continuity.</h2>
+            <p class="section-desc">
+              Every Assista partnership follows a clear, tested methodology designed to absorb workflow friction with zero operational disruption.
+            </p>
+          </div>
+          <div>
+            <a href="/how-we-work" class="btn btn-navy">
+              <span>Learn how we work</span>
+              <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="connected-process-track">
+          <div class="process-track-line-wrapper" aria-hidden="true">
+            <div class="process-track-line">
+              <div class="process-track-progress" id="process-progress-line"></div>
+            </div>
+          </div>
+
+          <div class="process-steps-grid">
+            <div class="process-step-node pillar-item">
+              <div class="process-node-indicator">
+                <span class="process-node-num">01</span>
+              </div>
+              <div class="process-node-content">
+                <div class="process-node-tag">STAGE 01 / AUDIT</div>
+                <h3 class="process-node-title">Understand</h3>
+                <p class="process-node-desc">Comprehensive workflow audit, bottleneck analysis, and software access mapping to identify priority operational leverage areas.</p>
+              </div>
+            </div>
+
+            <div class="process-step-node pillar-item">
+              <div class="process-node-indicator">
+                <span class="process-node-num">02</span>
+              </div>
+              <div class="process-node-content">
+                <div class="process-node-tag">STAGE 02 / SQUAD</div>
+                <h3 class="process-node-title">Build</h3>
+                <p class="process-node-desc">Assembling your dedicated, hand-picked operational squad and authoring customized Standard Operating Procedures (SOPs).</p>
+              </div>
+            </div>
+
+            <div class="process-step-node pillar-item">
+              <div class="process-node-indicator">
+                <span class="process-node-num">03</span>
+              </div>
+              <div class="process-node-content">
+                <div class="process-node-tag">STAGE 03 / ONBOARD</div>
+                <h3 class="process-node-title">Integrate</h3>
+                <p class="process-node-desc">Seamless onboarding into your existing communication and software stack with calibrated shadow execution and quality checks.</p>
+              </div>
+            </div>
+
+            <div class="process-step-node pillar-item">
+              <div class="process-node-indicator">
+                <span class="process-node-num">04</span>
+              </div>
+              <div class="process-node-content">
+                <div class="process-node-tag">STAGE 04 / RUN</div>
+                <h3 class="process-node-title">Operate</h3>
+                <p class="process-node-desc">Continuous daily execution, proactive escalation triage, and regular operational reviews with your assigned Client Director.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: WHY ASSISTA (POSITIVE POSITIONING) -->
+    <section class="section section-subtle" id="why-assista">
+      <div class="container reveal-on-scroll">
+        <div class="editorial-split-grid" style="align-items: center;">
+          <div class="editorial-split-visual">
+            <div class="editorial-photo-card">
+              <div class="photo-card-img-wrapper">
+                <video class="why-assista-video ambient-cinematic" autoplay muted loop playsinline poster="/images/hero-candid-team.jpg" aria-label="Assista Dedicated Operational Specialists Collaborating">
+                  <source src="/videos/team-operations.mp4" type="video/mp4">
+                  <img src="/images/hero-candid-team.jpg" alt="Assista Dedicated Operational Specialists Collaborating" width="800" height="600" loading="lazy" class="editorial-img">
+                </video>
+              </div>
+              <div class="photo-card-chip">
+                <span class="status-pulse-dot" aria-hidden="true"></span>
+                <span>DIRECT HUMAN ACCOUNTABILITY</span>
+              </div>
+              <div class="photo-card-caption">
+                <span class="caption-tag">SPECIALIST SQUAD</span>
+                <span class="caption-text">Dedicated professionals embedded directly into client operations.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="editorial-split-text">
+            <span class="section-tag">Operational Distinction</span>
+            <h2 class="section-title">Built for reliability, accountability, and continuity.</h2>
+            <p class="section-desc">
+              Modern enterprises succeed when critical workflows are anchored by accountable people who understand nuance and take pride in operational rigor.
+            </p>
+
+            <div class="editorial-features-list">
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Human-Led Execution</h3>
+                  <p class="feature-item-desc">Nuanced judgment, contextual discernment, and personal care applied to your most sensitive correspondence and critical operational tasks.</p>
+                </div>
+              </div>
+
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Operational Continuity</h3>
+                  <p class="feature-item-desc">Dedicated squad architecture backed by living standard operating procedures eliminates single-person dependencies and vacation disruption.</p>
+                </div>
+              </div>
+
+              <div class="editorial-feature-item">
+                <div class="feature-icon-badge" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                <div>
+                  <h3 class="feature-item-title">Strict Confidentiality</h3>
+                  <p class="feature-item-desc">Role-based access permissions, credential sandboxing, and bilateral confidentiality agreements ensuring complete protection of proprietary data.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <section class="editorial-cta-section">
+      <div class="container cta-editorial-inner reveal-on-scroll">
+        <div>
+          <h2 class="cta-editorial-title">Ready to give your business dedicated operational momentum?</h2>
+          <p class="cta-editorial-desc">
+            Connect directly with an Assista client director to evaluate your workflow bottlenecks and assemble your dedicated operational cell.
+          </p>
+        </div>
+        <div>
+          <a href="/contact" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1rem;">
+            <span>Talk to Assista</span>
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  
+  </main>
+
+  
+  <!-- INSTITUTIONAL FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-top-grid reveal-on-scroll">
+        <div class="footer-brand-col">
+          <a href="/" class="brand-link" aria-label="Assista Corp Homepage">
+            <picture>
+              <source srcset="/images/assista-logo.svg" type="image/svg+xml">
+              <img src="/images/assista-logo.png" alt="Assista Corp — People | Operations | Progress" class="site-logo footer-logo" width="195" height="35">
+            </picture>
+          </a>
+          <p>
+            Dedicated operational teams and specialist business support. Empowering high-stakes enterprises to execute with consistency, discretion, and accountability.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Services</div>
+          <ul class="footer-links-list">
+            <li><a href="/services/executive-support" class="footer-link">Executive Support</a></li>
+            <li><a href="/services/finance-reconciliation" class="footer-link">Finance &amp; Reconciliation</a></li>
+            <li><a href="/services/customer-care" class="footer-link">Customer Care &amp; CX</a></li>
+            <li><a href="/services/recruitment-talent" class="footer-link">Recruitment &amp; Talent</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Industries</div>
+          <ul class="footer-links-list">
+            <li><a href="/industries#healthcare" class="footer-link">Healthcare &amp; Clinical</a></li>
+            <li><a href="/industries#wealth" class="footer-link">Private Wealth Offices</a></li>
+            <li><a href="/industries#legal" class="footer-link">Corporate Law Firms</a></li>
+            <li><a href="/industries#ecommerce" class="footer-link">E-Commerce &amp; Brands</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Company</div>
+          <ul class="footer-links-list">
+            <li><a href="/how-we-work" class="footer-link">How We Work</a></li>
+            <li><a href="/about" class="footer-link">About Assista</a></li>
+            <li><a href="/how-we-work#insights" class="footer-link">Insights</a></li>
+            <li><a href="/contact" class="footer-link">Contact Assista</a></li>
+            <li><a href="/admin" class="footer-link" style="color:var(--brand-navy); font-weight:600;">Operations Portal (Staff)</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom-row">
+        <div>
+          &copy; 2026 Assista Corp. All rights reserved. Global Business Services.
+        </div>
+        <div class="footer-bottom-links">
+          <a href="/about#confidentiality">Confidentiality Standards</a>
+          <a href="/about#governance">Operating Governance</a>
+          <a href="/login">Portal Access</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  
+  <!-- CONSULTATION MODAL (TALK TO ASSISTA) -->
+  <div class="modal-overlay" id="inquiry-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog">&times;</button>
+      
+      <div style="margin-bottom: 2rem;">
+        <span class="section-tag" style="margin-bottom: 0.5rem;">Direct Partner Consultation</span>
+        <h3 id="modal-heading" style="font-size: 1.6rem; font-weight: 800; color: var(--brand-navy); margin-bottom: 0.5rem;">
+          Talk to Assista
+        </h3>
+        <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5;">
+          Connect with an onboarding director to discuss your operational requirements, team structure, and timeline. All inquiries are protected under strict confidentiality.
+        </p>
+      </div>
+
+      <form id="inquiry-form">
+        <input type="hidden" name="turnstile_token" value="cf_turnstile_pass_token_demo">
+        <input type="hidden" id="lead-squad-field" name="lead_squad" value="General Inquiry">
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="inq-name">Your Full Name *</label>
+            <input type="text" id="inq-name" name="name" class="form-input" required placeholder="e.g. Eleanor Vance">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inq-email">Business Email *</label>
+            <input type="email" id="inq-email" name="email" class="form-input" required placeholder="e.g. e.vance@firm.com">
+          </div>
+        </div>
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label" for="inq-company">Company / Organization *</label>
+            <input type="text" id="inq-company" name="company" class="form-input" required placeholder="e.g. Kensington Advisory">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="inq-industry">Industry Sector</label>
+            <select id="inq-industry" name="industry" class="form-select">
+              <option value="Healthcare">Healthcare &amp; Clinical</option>
+              <option value="Wealth">Private Wealth &amp; Family Office</option>
+              <option value="Legal">Corporate Law Practice</option>
+              <option value="E-Commerce">E-Commerce &amp; Brands</option>
+              <option value="Financial">Financial Services</option>
+              <option value="Professional Services" selected>Professional Services</option>
+              <option value="Other">Other Sector</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inq-message">Operational Requirements &amp; Scope</label>
+          <textarea id="inq-message" name="message" class="form-textarea" rows="3" placeholder="Briefly describe the workflows, team functions, or bottlenecks you want Assista to support..."></textarea>
+        </div>
+
+        <div style="margin-top: 1.5rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem;">
+            <span>Submit Consultation Request</span>
+            <span class="btn-arrow" aria-hidden="true">&rarr;</span>
+          </button>
+        </div>
+      </form>
+
+      <div id="form-success-box" style="display: none; padding: 1.75rem; background: var(--bg-subtle); border-radius: var(--radius-sm); border: 1px solid var(--border-color); text-align: center;">
+        <div style="font-size: 2rem; color: var(--brand-navy); margin-bottom: 0.5rem;" aria-hidden="true">✓</div>
+        <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--brand-navy); margin-bottom: 0.5rem;">Inquiry Dispatched</h4>
+        <div id="form-status-msg"></div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- PRIVACY CONSENT BANNER -->
+  <aside class="consent-banner" id="consent-banner" role="region" aria-label="Privacy Consent">
+    <p>
+      We use strictly first-party, non-PII telemetry to optimize your experience. No third-party ad networks or data brokering.
+    </p>
+    <div class="consent-actions">
+      <button class="btn btn-outline" id="consent-reject-btn" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">Essential Only</button>
+      <button class="btn btn-primary" id="consent-accept-btn" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;">Accept All</button>
+    </div>
+  </aside>
+  
+
+  <!-- Core Scripts -->
+  <script src="/js/tracker.js" defer></script>
+  <script src="/js/motion.js" defer></script>
+  <script src="/js/motion-graphics.js" defer></script>
+  <script src="/js/app.js" defer></script>
+</body>
+</html>

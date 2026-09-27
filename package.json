@@ -1,0 +1,21 @@
+{
+  "name": "assista-corp",
+  "version": "1.0.0",
+  "description": "ASSISTA CORP — Global Business Services Platform. The People Behind Business.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node data/seed.js",
+    "test": "node tests/run_tests.js"
+  },
+  "keywords": [
+    "assista",
+    "business-services",
+    "cms",
+    "crm",
+    "analytics"
+  ],
+  "author": "ASSISTA CORP",
+  "license": "UNLICENSED"
+}
