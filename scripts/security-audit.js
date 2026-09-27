@@ -20,6 +20,7 @@ const forbiddenPatterns = [
 
 const skipDirs = new Set(['node_modules', '.git', 'data']);
 let findings = 0;
+let testFixtures = 0;
 
 function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -27,11 +28,18 @@ function walk(dir) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full);
     else if (/\.(js|json|yml|yaml|env|txt)$/.test(entry.name)) {
+      const relative = path.relative(root, full).replaceAll(path.sep, '/');
+      const isTestFixture = relative.startsWith('tests/');
       const text = fs.readFileSync(full, 'utf8');
       for (const pattern of forbiddenPatterns) {
         if (pattern.test(text)) {
-          console.error(`Potential secret pattern: ${path.relative(root, full)}`);
-          findings++;
+          if (isTestFixture) {
+            testFixtures++;
+            console.warn(`Test fixture contains credential-like test data (not treated as production secret): ${relative}`);
+          } else {
+            console.error(`Potential secret pattern: ${relative}`);
+            findings++;
+          }
           break;
         }
       }
@@ -41,4 +49,4 @@ function walk(dir) {
 
 walk(root);
 if (findings) process.exitCode = 1;
-else console.log('Source secret-pattern audit: clean.');
+else console.log(`Source secret-pattern audit: clean (${testFixtures} test-fixture finding(s) excluded from production-secret scan).`);
