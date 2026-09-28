@@ -97,7 +97,16 @@ jobs:
       - name: Validate production Compose hardening
         env:
           CLOUDFLARE_TUNNEL_TOKEN: ci-placeholder
+        shell: bash
         run: |
+          set -euo pipefail
+
+          # Production secrets are intentionally not stored in Git. Compose requires
+          # the env_file to exist for config validation, so create an empty CI-only
+          # placeholder and remove it when this step exits.
+          trap 'rm -f .env.production' EXIT
+          : > .env.production
+
           docker compose -f docker-compose.prod.yml config --quiet
           grep -q 'no-new-privileges:true' docker-compose.prod.yml
           grep -q 'cap_drop:' docker-compose.prod.yml
