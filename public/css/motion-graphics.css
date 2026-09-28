@@ -1,7 +1,7 @@
 /**
  * ASSISTA CORP — Purposeful Motion Graphics & Business Workflow Animations
  * "The People Behind Business."
- * 
+ *
  * Visual Language:
  * - Deep navy (#172554)
  * - Accent lime (#B8F000)
@@ -9,10 +9,6 @@
  * - Clean geometric SVG lines
  * - Restrained, looping micro-interactions (6–8s duration)
  */
-
-/* ==========================================================================
-   1. CINEMATIC AMBIENT MOTION & VIDEO STYLING
-   ========================================================================== */
 
 .hero-cinematic-video,
 .why-assista-video {
@@ -23,7 +19,6 @@
   display: block;
 }
 
-/* Subtle ambient cinemagraph drift (Ken Burns effect) */
 .ambient-cinematic {
   animation: ambientDrift 16s ease-in-out infinite alternate;
   transform-origin: center center;
@@ -31,26 +26,13 @@
 }
 
 @keyframes ambientDrift {
-  0% {
-    transform: scale(1) translate(0, 0);
-  }
-  50% {
-    transform: scale(1.035) translate(-4px, -3px);
-  }
-  100% {
-    transform: scale(1.02) translate(3px, 2px);
-  }
+  0% { transform: scale(1) translate(0, 0); }
+  50% { transform: scale(1.035) translate(-4px, -3px); }
+  100% { transform: scale(1.02) translate(3px, 2px); }
 }
 
-/* Pause drift on user hover to allow close inspection */
 .hero-editorial-frame:hover .ambient-cinematic,
-.editorial-photo-card:hover .ambient-cinematic {
-  animation-play-state: paused;
-}
-
-/* ==========================================================================
-   2. SERVICE WORKFLOW MOTION VISUALS (SVG & CSS MICRO-LOOPS)
-   ========================================================================== */
+.editorial-photo-card:hover .ambient-cinematic { animation-play-state: paused; }
 
 .service-workflow-viz {
   margin: 1.25rem 0 1.5rem 0;
@@ -96,29 +78,18 @@
   animation: pulseDot 2s infinite;
 }
 
-/* Interactive SVG Workflow Track */
-.workflow-track-svg {
-  width: 100%;
-  height: auto;
-  display: block;
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,.35); }
+  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
 }
 
-/* Traveling pulse animation along connecting workflow paths */
+.workflow-track-svg { width: 100%; height: auto; display: block; }
+
 @keyframes flowPulse {
-  0% {
-    stroke-dashoffset: 120;
-    opacity: 0.2;
-  }
-  20% {
-    opacity: 1;
-  }
-  80% {
-    opacity: 1;
-  }
-  100% {
-    stroke-dashoffset: 0;
-    opacity: 0.2;
-  }
+  0% { stroke-dashoffset: 120; opacity: 0.2; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.2; }
 }
 
 .path-track {
@@ -146,7 +117,6 @@
   fill: none;
 }
 
-/* Node Step Transitions */
 .node-circle {
   fill: #FFFFFF;
   stroke: #CBD5E1;
@@ -154,10 +124,7 @@
   transition: all 0.35s ease;
 }
 
-.node-circle-active {
-  fill: var(--brand-navy);
-  stroke: var(--brand-navy);
-}
+.node-circle-active { fill: var(--brand-navy); stroke: var(--brand-navy); }
 
 .node-icon {
   fill: none;
@@ -189,50 +156,15 @@
   fill: var(--text-secondary);
 }
 
-/* Step Sequenced Highlights */
-@keyframes stepHighlight1 {
-  0%, 100% { opacity: 0.4; }
-  10%, 40% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
+@keyframes stepHighlight1 { 0%, 100% { opacity: 0.4; } 10%, 40% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes stepHighlight2 { 0%, 25% { opacity: 0.4; } 35%, 65% { opacity: 1; } 75%, 100% { opacity: 0.4; } }
+@keyframes stepHighlight3 { 0%, 50% { opacity: 0.4; } 60%, 90% { opacity: 1; } 95%, 100% { opacity: 0.4; } }
+@keyframes stepHighlight4 { 0%, 70% { opacity: 0.4; } 80%, 98% { opacity: 1; } 100% { opacity: 0.4; } }
 
-@keyframes stepHighlight2 {
-  0%, 25% { opacity: 0.4; }
-  35%, 65% { opacity: 1; }
-  75%, 100% { opacity: 0.4; }
-}
-
-@keyframes stepHighlight3 {
-  0%, 50% { opacity: 0.4; }
-  60%, 90% { opacity: 1; }
-  95%, 100% { opacity: 0.4; }
-}
-
-@keyframes stepHighlight4 {
-  0%, 70% { opacity: 0.4; }
-  80%, 98% { opacity: 1; }
-  100% { opacity: 0.4; }
-}
-
-.anim-step-1 {
-  animation: stepHighlight1 6s infinite;
-}
-
-.anim-step-2 {
-  animation: stepHighlight2 6s infinite;
-}
-
-.anim-step-3 {
-  animation: stepHighlight3 6s infinite;
-}
-
-.anim-step-4 {
-  animation: stepHighlight4 6s infinite;
-}
-
-/* ==========================================================================
-   3. "HOW WE WORK" CONNECTED PROCESS PROGRESSION GLOW
-   ========================================================================== */
+.anim-step-1 { animation: stepHighlight1 6s infinite; }
+.anim-step-2 { animation: stepHighlight2 6s infinite; }
+.anim-step-3 { animation: stepHighlight3 6s infinite; }
+.anim-step-4 { animation: stepHighlight4 6s infinite; }
 
 .process-track-progress {
   position: absolute;
@@ -251,35 +183,157 @@
   box-shadow: 0 0 0 4px rgba(184, 240, 0, 0.25), 0 8px 20px rgba(23, 37, 84, 0.2);
 }
 
-.process-step-node.step-active .process-node-num {
-  color: var(--brand-lime);
+.process-step-node.step-active .process-node-num { color: var(--brand-lime); }
+
+:root {
+  --brand-bg: #F7F8F3;
+  --brand-lime: #B8F000;
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* ==========================================================================
-   4. ACCESSIBILITY: PREFERS-REDUCED-MOTION
-   ========================================================================== */
+.hero-editorial-frame {
+  isolation: isolate;
+  border: 1px solid rgba(23,37,84,.12);
+  box-shadow: 0 22px 60px -28px rgba(23,37,84,.32);
+  transition: transform .45s cubic-bezier(.16,1,.3,1), box-shadow .45s ease;
+}
+
+.hero-editorial-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background: linear-gradient(135deg, rgba(184,240,0,.10), transparent 32%, transparent 68%, rgba(23,37,84,.10));
+  mix-blend-mode: multiply;
+}
+
+.hero-editorial-frame:hover { transform: translateY(-4px); box-shadow: 0 30px 75px -30px rgba(23,37,84,.40); }
+.hero-status-chip { transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s ease; }
+.hero-editorial-frame:hover .hero-status-chip { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(23,37,84,.12); }
+
+.editorial-photo-card,
+.visual-service-card { transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s ease, border-color .3s ease; }
+.editorial-photo-card:hover,
+.visual-service-card:hover { transform: translateY(-6px); box-shadow: 0 24px 55px -24px rgba(23,37,84,.28); }
+.editorial-photo-card .photo-card-img-wrapper,
+.visual-service-card .service-thumb-frame { overflow: hidden; }
+.editorial-photo-card img,
+.visual-service-card .service-thumb-img { transition: transform .7s cubic-bezier(.16,1,.3,1), filter .45s ease; }
+.editorial-photo-card:hover img,
+.visual-service-card:hover .service-thumb-img { transform: scale(1.035); filter: saturate(1.04) contrast(1.02); }
+
+.visual-service-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 1.5rem;
+  right: 1.5rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand-navy), var(--brand-lime));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .45s cubic-bezier(.16,1,.3,1);
+  z-index: 5;
+}
+.visual-service-card:hover::before { transform: scaleX(1); }
+
+.service-workflow-viz::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .34;
+  background-image: linear-gradient(rgba(23,37,84,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(23,37,84,.035) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.service-workflow-viz > * { position: relative; z-index: 1; }
+.btn-primary, .btn-navy, .btn-outline { will-change: transform; }
+.btn-primary:active, .btn-navy:active, .btn-outline:active { transform: translateY(1px) scale(.985); }
+.nav-link.active { color: var(--brand-navy); font-weight: 700; }
+.nav-link.active::after { transform: scaleX(1); }
+::selection { background: var(--brand-lime); color: var(--text-primary); }
+
+/* Phase 3 — cross-page editorial polish */
+.breadcrumb-nav {
+  border-bottom: 1px solid rgba(23,37,84,.07);
+  background: rgba(247,248,243,.72);
+}
+.breadcrumb-list { display:flex; align-items:center; gap:.55rem; min-height:42px; font-size:.78rem; color:var(--text-muted); }
+.breadcrumb-link { color:var(--text-secondary); }
+.breadcrumb-link:hover { color:var(--brand-navy); }
+.breadcrumb-item.active { color:var(--brand-navy); font-weight:600; }
+.breadcrumb-separator { opacity:.45; }
+
+.page-hero {
+  position:relative;
+  overflow:hidden;
+  padding:clamp(4.5rem,8vw,7.5rem) 0 clamp(4rem,7vw,6rem);
+  background:linear-gradient(135deg,#f7f8f3 0%,#fff 54%,#eef0ea 100%);
+  border-bottom:1px solid var(--border-color);
+}
+.page-hero::before {
+  content:'';
+  position:absolute;
+  width:420px;
+  height:420px;
+  right:-140px;
+  top:-180px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(184,240,0,.16),transparent 68%);
+  pointer-events:none;
+}
+.page-hero::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  opacity:.28;
+  pointer-events:none;
+  background-image:linear-gradient(rgba(23,37,84,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(23,37,84,.035) 1px,transparent 1px);
+  background-size:28px 28px;
+  mask-image:linear-gradient(to bottom,black,transparent 82%);
+}
+.page-hero > .container { position:relative; z-index:1; }
+.page-hero-title { max-width:900px; font-size:clamp(2.7rem,6vw,5.2rem); line-height:1.03; letter-spacing:-.045em; color:var(--brand-navy); }
+.page-hero-lead { max-width:760px; margin-top:1.35rem; font-size:clamp(1.05rem,1.7vw,1.25rem); line-height:1.7; color:var(--text-secondary); }
+
+.who-for-card {
+  position:relative;
+  overflow:hidden;
+  border:1px solid var(--border-color);
+  background:rgba(255,255,255,.78);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-card);
+  transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s ease,border-color .3s ease;
+}
+.who-for-card::before { content:''; position:absolute; left:0; top:0; width:3px; height:100%; background:linear-gradient(var(--brand-lime),var(--brand-navy)); transform:scaleY(0); transform-origin:bottom; transition:transform .35s ease; }
+.who-for-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-card-hover); border-color:rgba(23,37,84,.16); }
+.who-for-card:hover::before { transform:scaleY(1); }
+.who-for-title { transition:color .25s ease,transform .25s ease; }
+.who-for-card:hover .who-for-title { color:var(--brand-navy); transform:translateX(3px); }
+
+.editorial-cta-section { position:relative; overflow:hidden; }
+.cta-editorial-inner { position:relative; border:1px solid rgba(23,37,84,.12); border-radius:var(--radius-lg); background:linear-gradient(120deg,var(--brand-navy),#1e3a8a); box-shadow:0 25px 65px -30px rgba(23,37,84,.38); overflow:hidden; }
+.cta-editorial-inner::before { content:''; position:absolute; width:280px; height:280px; right:-100px; top:-120px; border-radius:50%; background:rgba(184,240,0,.13); }
+.cta-editorial-inner::after { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size:22px 22px; pointer-events:none; }
+.cta-editorial-inner > * { position:relative; z-index:1; }
+.cta-editorial-inner .cta-editorial-title { color:#fff; }
+.cta-editorial-inner .cta-editorial-desc { color:rgba(255,255,255,.78); }
+
+.nav-dropdown { box-shadow:0 18px 45px -22px rgba(23,37,84,.32); border-color:rgba(23,37,84,.12); }
+.nav-dropdown-item { transition:background-color .2s ease,transform .2s ease; }
+.nav-dropdown-item:hover { transform:translateX(3px); background:var(--bg-subtle); }
+
+@media (max-width:700px) {
+  .hero-editorial-frame:hover,.editorial-photo-card:hover,.visual-service-card:hover,.who-for-card:hover { transform:none; }
+  .hero-editorial-frame { box-shadow:0 18px 45px -26px rgba(23,37,84,.35); }
+  .page-hero { padding-top:3.75rem; }
+  .breadcrumb-list { min-height:38px; }
+  .cta-editorial-inner { border-radius:var(--radius-md); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-cinematic,
-  .path-flowing,
-  .path-flowing-lime,
-  .anim-step-1,
-  .anim-step-2,
-  .anim-step-3,
-  .anim-step-4,
-  .workflow-pulse-dot {
-    animation: none !important;
-    transform: none !important;
-  }
-
-  .path-flowing,
-  .path-flowing-lime {
-    stroke-dashoffset: 0 !important;
-    opacity: 1 !important;
-  }
-
-  .process-track-progress {
-    width: 100% !important;
-    transition: none !important;
-  }
+  .ambient-cinematic,.path-flowing,.path-flowing-lime,.anim-step-1,.anim-step-2,.anim-step-3,.anim-step-4,.workflow-pulse-dot,.hero-editorial-frame,.editorial-photo-card,.visual-service-card,.editorial-photo-card img,.visual-service-card .service-thumb-img,.btn-primary,.btn-navy,.btn-outline,.who-for-card,.who-for-title,.nav-dropdown-item { animation:none !important; transition:none !important; transform:none !important; }
+  .path-flowing,.path-flowing-lime { stroke-dashoffset:0 !important; opacity:1 !important; }
+  .process-track-progress { width:100% !important; transition:none !important; }
 }
