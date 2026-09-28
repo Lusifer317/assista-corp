@@ -15,7 +15,8 @@ assert.match(robots, /Sitemap: https:\/\/assistacorp\.com\/sitemap\.xml/);
 assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
 assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
 for (const route of ['/', '/services', '/industries', '/how-we-work', '/about', '/contact']) {
-  assert.match(sitemap, new RegExp(`<loc>https://assistacorp\\.com${route === '/' ? '' : route}</loc>`));
+  const sitemapPath = route === '/' ? '/' : route;
+  assert.match(sitemap, new RegExp(`<loc>https://assistacorp\\.com${sitemapPath.replace(/\//g, '\\/')}</loc>`));
 }
 assert.match(sitemap, /<\/urlset>$/);
 
