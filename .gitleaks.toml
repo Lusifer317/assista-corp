@@ -3,3 +3,5 @@ description = "Seed fixture contains documented non-production test credentials"
 paths = [
   '''data/seed\.js'''
 ]
+
+# The seed fixture must never contain production credentials; production seed passwords are environment-provided.
