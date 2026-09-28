@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - phase-4-production-hardening
+      - phase-4-production-verification
   pull_request:
     branches:
       - main
@@ -68,5 +69,16 @@ jobs:
 
       - name: Inspect image configuration
         run: |
-          docker image inspect assista-corp:ci --format '{{json .Config.User}}'
-          docker image inspect assista-corp:ci --format '{{json .Config.Healthcheck}}'
+          test "$(docker image inspect assista-corp:ci --format '{{json .Config.User}}')" = '"nonroot"'
+          docker image inspect assista-corp:ci --format '{{json .Config.Healthcheck}}' | grep -q 'health'
+
+      - name: Validate production Compose hardening
+        env:
+          CLOUDFLARE_TUNNEL_TOKEN: ci-placeholder
+        run: |
+          docker compose -f docker-compose.prod.yml config --quiet
+          grep -q 'no-new-privileges:true' docker-compose.prod.yml
+          grep -q 'cap_drop:' docker-compose.prod.yml
+          grep -q 'read_only: true' docker-compose.prod.yml
+          grep -q 'cloudflare/cloudflared:2026.9.3' docker-compose.prod.yml
+          ! grep -qE 'ports:[[:space:]]*$' docker-compose.prod.yml
