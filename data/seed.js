@@ -7,9 +7,9 @@ function seedDatabase() {
   // 1. Seed Users
   db.exec('DELETE FROM users');
   const adminSecret = generateBase32Secret();
-  const { hash: adminHash, salt: adminSalt } = hashPassword('Assista2026!Secured');
-  const { hash: editorHash, salt: editorSalt } = hashPassword('Assista2026!Editor');
-  const { hash: salesHash, salt: salesSalt } = hashPassword('Assista2026!Sales');
+  const { hash: adminHash, salt: adminSalt } = hashPassword(process.env.SEED_ADMIN_PASSWORD);
+  const { hash: editorHash, salt: editorSalt } = hashPassword(process.env.SEED_EDITOR_PASSWORD);
+  const { hash: salesHash, salt: salesSalt } = hashPassword(process.env.SEED_SALES_PASSWORD);
 
   const insertUser = db.prepare(`
     INSERT INTO users (email, password_hash, salt, name, role, mfa_secret, mfa_enabled)
