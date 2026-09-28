@@ -72,9 +72,27 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Inspect image configuration
+        shell: bash
         run: |
-          test "$(docker image inspect assista-corp:ci --format '{{json .Config.User}}')" = '"nonroot"'
-          docker image inspect assista-corp:ci --format '{{json .Config.Healthcheck}}' | grep -q 'health'
+          set -euo pipefail
+
+          user="$(docker image inspect assista-corp:ci --format '{{.Config.User}}')"
+          echo "Configured container user: ${user}"
+
+          # Distroless nonroot images may report the symbolic user or its numeric UID.
+          case "${user}" in
+            nonroot|65532|65532:65532)
+              ;;
+            *)
+              echo "Container must run as a non-root user; got: ${user:-<empty>}"
+              exit 1
+              ;;
+          esac
+
+          healthcheck="$(docker image inspect assista-corp:ci --format '{{json .Config.Healthcheck}}')"
+          echo "Configured healthcheck: ${healthcheck}"
+          test "${healthcheck}" != "null"
+          echo "${healthcheck}" | grep -q 'health'
 
       - name: Validate production Compose hardening
         env:
