@@ -26,6 +26,8 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Run application security tests
         run: npm test
+      - name: Validate production assets
+        run: node tests/test_production_assets.js
       - name: Run source and dependency audit
         run: node scripts/security-audit.js
       - name: Run npm audit
