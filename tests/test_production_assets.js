@@ -18,6 +18,9 @@ for (const route of ['/', '/services', '/industries', '/how-we-work', '/about', 
   const sitemapPath = route === '/' ? '/' : route;
   assert.match(sitemap, new RegExp(`<loc>https://assistacorp\\.com${sitemapPath.replace(/\//g, '\\/')}</loc>`));
 }
-assert.match(sitemap, /<\/urlset>$/);
+// XML files commonly end with a newline; validate the closing element while
+// allowing harmless trailing whitespace rather than requiring EOF immediately
+// after the closing tag.
+assert.match(sitemap, /<\/urlset>\s*$/);
 
 console.log('✓ Production robots.txt and sitemap.xml assets');
