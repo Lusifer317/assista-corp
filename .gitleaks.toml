@@ -1,0 +1,5 @@
+[allowlist]
+description = "Seed fixture contains documented non-production test credentials"
+paths = [
+  '''data/seed\.js'''
+]
