@@ -1,0 +1,115 @@
+name: Security CI
+
+on:
+  push:
+    branches:
+      - main
+      - phase-4-production-hardening
+      - phase-4-production-verification
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  application-security:
+    name: Application Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Run application tests
+        env:
+          NODE_ENV: test
+        run: npm test
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  container-security:
+    name: Container Security Checks
+    runs-on: ubuntu-latest
+    needs: application-security
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build production image
+        run: docker build --pull --tag assista-corp:ci .
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: assista-corp:ci
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Inspect image configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          user="$(docker image inspect assista-corp:ci --format '{{.Config.User}}')"
+          echo "Configured container user: ${user}"
+
+          # Distroless nonroot images may report the symbolic user or its numeric UID.
+          case "${user}" in
+            nonroot|65532|65532:65532)
+              ;;
+            *)
+              echo "Container must run as a non-root user; got: ${user:-<empty>}"
+              exit 1
+              ;;
+          esac
+
+          healthcheck="$(docker image inspect assista-corp:ci --format '{{json .Config.Healthcheck}}')"
+          echo "Configured healthcheck: ${healthcheck}"
+          test "${healthcheck}" != "null"
+          echo "${healthcheck}" | grep -q 'health'
+
+      - name: Validate production Compose hardening
+        env:
+          CLOUDFLARE_TUNNEL_TOKEN: ci-placeholder
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Production secrets are intentionally not stored in Git. Compose requires
+          # the env_file to exist for config validation, so create an empty CI-only
+          # placeholder and remove it when this step exits.
+          trap 'rm -f .env.production' EXIT
+          : > .env.production
+
+          docker compose -f docker-compose.prod.yml config --quiet
+          grep -q 'no-new-privileges:true' docker-compose.prod.yml
+          grep -q 'cap_drop:' docker-compose.prod.yml
+          grep -q 'read_only: true' docker-compose.prod.yml
+          grep -q 'cloudflare/cloudflared:2026.9.3' docker-compose.prod.yml
+          ! grep -qE 'ports:[[:space:]]*$' docker-compose.prod.yml

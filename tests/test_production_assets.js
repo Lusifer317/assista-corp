@@ -1,0 +1,26 @@
+const assert = require('node:assert');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const publicDir = path.join(__dirname, '..', 'public');
+const robots = fs.readFileSync(path.join(publicDir, 'robots.txt'), 'utf8');
+const sitemap = fs.readFileSync(path.join(publicDir, 'sitemap.xml'), 'utf8');
+
+assert.match(robots, /^User-agent: \*/m);
+assert.match(robots, /^Disallow: \/admin$/m);
+assert.match(robots, /^Disallow: \/login$/m);
+assert.match(robots, /^Disallow: \/api\/$/m);
+assert.match(robots, /Sitemap: https:\/\/assistacorp\.com\/sitemap\.xml/);
+
+assert.match(sitemap, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
+assert.match(sitemap, /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/);
+for (const route of ['/', '/services', '/industries', '/how-we-work', '/about', '/contact']) {
+  const sitemapPath = route === '/' ? '/' : route;
+  assert.match(sitemap, new RegExp(`<loc>https://assistacorp\\.com${sitemapPath.replace(/\//g, '\\/')}</loc>`));
+}
+// XML files commonly end with a newline; validate the closing element while
+// allowing harmless trailing whitespace rather than requiring EOF immediately
+// after the closing tag.
+assert.match(sitemap, /<\/urlset>\s*$/);
+
+console.log('✓ Production robots.txt and sitemap.xml assets');
