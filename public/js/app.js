@@ -343,7 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           website: formData.get('website')
         },
         message: formData.get('message'),
-        session_id: window.AssistaAnalytics ? window.AssistaAnalytics.sessionId : null,
+        session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
         turnstile_token: formData.get('turnstile_token') || 'cf_turnstile_pass_token_demo'
       };
 
