@@ -162,7 +162,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       (scenario.behind_tasks || []).forEach(task => {
         const row = document.createElement('div');
         row.className = 'behind-task-row';
-        row.innerHTML = `<span class="task-bullet-dot"></span><span>${task}</span>`;
+        const bullet = document.createElement('span');
+        bullet.className = 'task-bullet-dot';
+        const taskText = document.createElement('span');
+        taskText.textContent = String(task ?? '');
+        row.append(bullet, taskText);
         behindTasks.appendChild(row);
       });
     }
@@ -267,7 +271,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           coverage: 'Dedicated Squad'
         },
         message: formData.get('message'),
-        session_id: window.AssistaAnalytics ? window.AssistaAnalytics.sessionId : null,
+        session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
         turnstile_token: formData.get('turnstile_token') || 'cf_turnstile_pass_token_demo'
       };
 
@@ -285,10 +289,22 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (formSuccessBox) {
             formSuccessBox.style.display = 'block';
             if (formStatusMsg) {
-              formStatusMsg.innerHTML = `
-                <p style="margin-bottom: 0.75rem; color: #111827;">Thank you, <strong>${payload.name}</strong>. Your consultation inquiry for <strong>${payload.company}</strong> has been received.</p>
-                <p style="color: #5B6472; font-size: 0.88rem;">Reference: <strong>#LEAD-${resData.leadId}</strong>. A client director will review your operational requirements and follow up directly.</p>
-              `;
+              formStatusMsg.replaceChildren();
+            const thankYou = document.createElement('p');
+            thankYou.style.cssText = 'margin-bottom: 0.75rem; color: #111827;';
+            thankYou.append(document.createTextNode('Thank you, '));
+            const contactName = document.createElement('strong');
+            contactName.textContent = String(payload.name || '');
+            const companyName = document.createElement('strong');
+            companyName.textContent = String(payload.company || '');
+            thankYou.append(contactName, document.createTextNode('. Your consultation inquiry for '), companyName, document.createTextNode(' has been received.'));
+            const reference = document.createElement('p');
+            reference.style.cssText = 'color: #5B6472; font-size: 0.88rem;';
+            reference.append(document.createTextNode('Reference: '));
+            const referenceId = document.createElement('strong');
+            referenceId.textContent = '#LEAD-' + String(resData.leadId);
+            reference.append(referenceId, document.createTextNode('. A client director will review your operational requirements and follow up directly.'));
+            formStatusMsg.append(thankYou, reference);
             }
           }
         } else {
