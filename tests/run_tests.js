@@ -13,6 +13,8 @@ const { buildCsp } = require('../lib/csp');
 
 console.log('--- RUNNING ASSISTA CORP TEST SUITE ---');
 
+require('./test_login_page'); console.log('✓ Test 0: Operations login CSP and credential exposure');
+
 {
   const pwd='TestSecretPassword2026!'; const {hash,salt}=hashPassword(pwd);
   assert.strictEqual(verifyPassword(pwd,hash,salt),true); assert.strictEqual(verifyPassword('WrongPassword',hash,salt),false); assert.throws(()=>hashPassword('short'),/at least 12 characters/); console.log('✓ Test 1: Password hashing and minimum length');
