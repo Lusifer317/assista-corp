@@ -33,7 +33,10 @@
 
   function sanitizeHtml(html) {
     const template = document.createElement('template');
-    template.innerHTML = String(html);
+    // Use the captured native setter/getter. Calling template.innerHTML here
+    // would re-enter this prototype override recursively and break all dynamic
+    // admin rendering (tables, cards, timelines and editor forms).
+    nativeInnerHTML.set.call(template, String(html));
 
     const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
     const nodes = [];
@@ -61,7 +64,7 @@
       }
     }
 
-    return template.innerHTML;
+    return nativeInnerHTML.get.call(template);
   }
 
   Object.defineProperty(Element.prototype, 'innerHTML', {
