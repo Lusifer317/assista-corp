@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   // HTML escaping does not make values safe for inline CSS.
   const safeTierColor = (value) => {
-    const allowed = new Set(['#C86A4B', '#22C55E', '#F59E0B', '#64748B', '#8B5CF6']);
+    const allowed = new Set(['#D97753', '#B36D38', '#667085', '#98A2B3', '#C86A4B', '#22C55E', '#F59E0B', '#64748B', '#8B5CF6']);
     return allowed.has(String(value || '')) ? value : '#C86A4B';
   };
   // Prevent spreadsheet formula execution from user-controlled lead fields.
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const encodedUri = encodeURIComponent(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
     link.setAttribute('download', `assista_leads_${Date.now()}.csv`);
