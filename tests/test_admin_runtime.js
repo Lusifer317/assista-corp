@@ -39,11 +39,26 @@ assert.match(adminJs, /No submitted leads yet/,
 assert.match(adminJs, /Lead capture is not ready/,
   'Admin settings must identify missing production Turnstile configuration.');
 
-const htmlForms = read('public/index.html') + read('public/contact.html');
-assert.doesNotMatch(htmlForms, /cf_turnstile_pass_token_demo|1x00000000000000000000AA/,
-  'Public inquiry forms must not contain demo Turnstile tokens or site keys.');
-assert.match(htmlForms, /data-turnstile-widget/,
-  'Public inquiry forms must provide a real Turnstile widget container.');
+const publicFormPaths = [
+  'public/index.html',
+  'public/contact.html',
+  'public/about.html',
+  'public/how-we-work.html',
+  'public/industries.html',
+  'public/services/index.html',
+  'public/services/customer-care.html',
+  'public/services/executive-support.html',
+  'public/services/finance-reconciliation.html',
+  'public/services/recruitment-talent.html',
+  'lib/pages.js'
+];
+for (const file of publicFormPaths) {
+  const html = read(file);
+  assert.doesNotMatch(html, /cf_turnstile_pass_token_demo|1x00000000000000000000AA/,
+    `${file} must not contain demo Turnstile tokens or site keys.`);
+  assert.match(html, /data-turnstile-widget/,
+    `${file} inquiry form must include a real Turnstile widget container.`);
+}
 
 const appJs = read('public/js/app.js');
 assert.match(appJs, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/,
@@ -56,10 +71,16 @@ assert.match(server, /pending_mfa_secret/,
   'MFA reconfiguration must retain the active secret until the pending secret is verified.');
 assert.match(server, /Enter a live Cloudflare Turnstile site key/,
   'Server must reject known Cloudflare test site keys in production settings.');
+assert.match(server, /TURNSTILE_EXPECTED_ACTION==='contact'/,
+  'Production Turnstile readiness must require the expected contact action.');
+assert.match(server, /TURNSTILE_EXPECTED_HOSTNAME==='assistacorp.com'/,
+  'Production Turnstile readiness must require the expected hostname.');
 
 const db = read('lib/db.js');
 assert.match(db, /ALTER TABLE users ADD COLUMN pending_mfa_secret TEXT/,
   'Existing databases must receive a non-destructive pending MFA migration.');
+assert.match(db, /1x0000000000000000000000000000000AA/,
+  'Existing databases must remove the exact legacy Cloudflare test secret without touching real credentials.');
 
 const seed = read('data/seed.js');
 assert.doesNotMatch(seed, /1x00000000000000000000AA|1x0000000000000000000000000000000AA/,
