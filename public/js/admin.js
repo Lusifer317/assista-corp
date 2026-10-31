@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     crm: { title: 'CRM Pipeline & Lead Intelligence', subtitle: 'Track prospective partnerships from anonymous exploration to dedicated squad deployment' },
     analytics: { title: 'Visitor Intelligence & Analytics', subtitle: 'Aggregate insight into high-intent actions, top capabilities, and industry demand' },
     cms: { title: 'CMS Content Studio', subtitle: 'Modify brand narrative, hero manifesto, and capability universe specifications' },
-    seo: { title: 'SEO Metadata & Corporate Settings', subtitle: 'Manage search metadata, global headquarters, and sales notification mailboxes' },
+    seo: { title: 'SEO Metadata & Corporate Settings', subtitle: 'Manage page titles, search descriptions, canonical URLs, and corporate settings' },
     audit: { title: 'Security & Audit Logs', subtitle: 'Tamper-evident logs of administrative actions, authentication, and data changes' }
   };
 
@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (tabId === 'crm') loadCRMLeads();
       if (tabId === 'analytics') loadAnalytics();
       if (tabId === 'cms') loadCMS();
-      if (tabId === 'seo') loadSettings();
+      if (tabId === 'seo') { if (currentUser.role === 'admin') loadSettings(); loadCMS(); }
       if (tabId === 'audit') loadAuditLogs();
     });
   });
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (activeTab === 'analytics') loadAnalytics();
     if (activeTab === 'audit') loadAuditLogs();
     if (activeTab === 'cms') loadCMS();
-    if (activeTab === 'seo') { loadSettings(); loadCMS(); }
+    if (activeTab === 'seo') { if (currentUser.role === 'admin') loadSettings(); loadCMS(); }
   });
 
   // -----------------------------------------------------------
