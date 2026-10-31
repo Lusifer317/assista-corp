@@ -3,7 +3,7 @@
   const originalFetch = window.fetch.bind(window);
 
   function csrfToken() {
-    const match = document.cookie.match(/(?:^|;\s*)assista_csrf=([^;]+)/);
+    const match = document.cookie.match(/(?:^|;\\s*)assista_csrf=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';
   }
 
@@ -11,29 +11,29 @@
     const request = input instanceof Request ? input : null;
     const url = request ? request.url : String(input);
     const method = String(init.method || request?.method || 'GET').toUpperCase();
-    const sameOrigin = new URL(url, window.location.href).origin === window.location.origin;
-
+    let sameOrigin = false;
+    try { sameOrigin = new URL(url, window.location.href).origin === window.location.origin; } catch {}
     if (!sameOrigin || SAFE_METHODS.has(method)) return originalFetch(input, init);
 
-    const headers = new Headers(request?.headers || init.headers || {});
+    const headers = new Headers(request?.headers || {});
+    new Headers(init.headers || {}).forEach((value, key) => headers.set(key, value));
     const token = csrfToken();
     if (token) headers.set('X-CSRF-Token', token);
-
     return originalFetch(input, { ...init, headers });
   };
 
-  // The legacy admin controller uses innerHTML for a number of dynamic views.
-  // Sanitize those assignments at the DOM boundary so attacker-controlled lead,
-  // note, attribution, analytics, and audit data cannot create executable HTML.
+  // Sanitize dynamic HTML inserted by the legacy admin controller. Use the
+  // captured native setter/getter for the detached template to avoid calling
+  // this override recursively.
   const nativeInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   if (!nativeInnerHTML?.set || !nativeInnerHTML?.get) return;
 
-  const SAFE_URI_SCHEMES = /^(?:https?:|mailto:|tel:|\/|#|data:image\/(?:png|gif|jpe?g|webp);base64,)/i;
+  const SAFE_URI_SCHEMES = /^(?:https?:|mailto:|tel:|\\/|#|data:image\\/(?:png|gif|jpe?g|webp);base64,)/i;
   const BLOCKED_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'style', 'template']);
 
   function sanitizeHtml(html) {
     const template = document.createElement('template');
-    template.innerHTML = String(html);
+    nativeInnerHTML.set.call(template, String(html));
 
     const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_ELEMENT);
     const nodes = [];
@@ -61,7 +61,7 @@
       }
     }
 
-    return template.innerHTML;
+    return nativeInnerHTML.get.call(template);
   }
 
   Object.defineProperty(Element.prototype, 'innerHTML', {
