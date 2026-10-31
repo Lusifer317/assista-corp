@@ -376,7 +376,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="lead-name-sub">\${escapeHTML(lead.name)} (\${escapeHTML(lead.industry)})</div>
         <div class="lead-disciplines-tags">\${tagsHtml}</div>
       \`;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', 'Open lead ' + String(lead.company || lead.name || lead.id));
       card.addEventListener('click', () => openLeadDossier(lead.id));
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openLeadDossier(lead.id);
+        }
+      });
       container.appendChild(card);
     });
 
@@ -448,10 +457,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Squad details
       const config = lead.team_configuration || {};
-      const disciplinesText = (config.disciplines || []).join(', ') || 'General Business Support';
+      const disciplinesText = Array.isArray(config.disciplines) && config.disciplines.length
+        ? config.disciplines.join(', ')
+        : (Array.isArray(lead.requirements) && lead.requirements.length ? lead.requirements.join(', ') : 'Not specified');
+      const coverageText = config.coverage ? String(config.coverage) : 'Not specified';
+      const hoursText = config.estimatedHours ? String(config.estimatedHours) : 'Not specified';
       document.getElementById('dossier-squad-details').innerHTML = `
         <div><strong>Disciplines Requested:</strong> ${escapeHTML(disciplinesText)}</div>
-        <div><strong>Estimated Coverage:</strong> ${escapeHTML(config.coverage || 'Dedicated Squad')} (${escapeHTML(config.estimatedHours || '35 hrs')}/week)</div>
+        <div><strong>Estimated Coverage:</strong> ${escapeHTML(coverageText)}</div>
+        <div><strong>Estimated Hours:</strong> ${escapeHTML(hoursText)}</div>
       `;
       document.getElementById('dossier-message-box').innerHTML = `
         <strong>Message from Prospect:</strong><br>
@@ -581,7 +595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(blobUrl);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
       showAdminStatus(`Exported ${leads.length} lead records.`, 'success');
     } catch (error) {
       showAdminStatus(error.message || 'Lead export failed.', 'error');
@@ -972,7 +986,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadAuditLogs() {
     try {
       const res = await fetch('/api/admin/audit');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to load security audit logs.');
       const logs = data.logs || [];
 
       const tbody = document.getElementById('audit-logs-tbody');
