@@ -18,13 +18,13 @@
       <div class="brand-logo" style="margin-bottom: 2rem; background: #FFFFFF; padding: 0.65rem 0.85rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
         <img src="/images/assista-logo.svg" alt="Assista Corp" style="height: 30px; width: auto; display: block;" onerror="this.src='/images/assista-logo.png'">
       </div>
-      <nav class="admin-nav">
-        <div class="admin-nav-item active" data-tab="live"><span>●</span> Live Activity <span class="pulse-dot" style="margin-left: auto;"></span></div>
-        <div class="admin-nav-item" data-tab="crm"><span>❖</span> CRM Pipeline <span class="nav-badge" id="crm-total-badge">0</span></div>
-        <div class="admin-nav-item" data-tab="analytics"><span>▲</span> Visitor Intelligence</div>
-        <div class="admin-nav-item" data-tab="cms"><span>✎</span> CMS Studio</div>
-        <div class="admin-nav-item" data-tab="seo"><span>◉</span> SEO & Settings</div>
-        <div class="admin-nav-item" data-tab="audit"><span>⚑</span> Security & Audit</div>
+      <nav class="admin-nav" aria-label="Operations sections">
+        <button type="button" class="admin-nav-item active" data-tab="live" aria-current="page"><span aria-hidden="true">●</span> Live Activity <span class="pulse-dot" style="margin-left: auto;" aria-hidden="true"></span></button>
+        <button type="button" class="admin-nav-item" data-tab="crm"><span aria-hidden="true">❖</span> CRM Pipeline <span class="nav-badge" id="crm-total-badge">0</span></button>
+        <button type="button" class="admin-nav-item" data-tab="analytics"><span aria-hidden="true">▲</span> Visitor Intelligence</button>
+        <button type="button" class="admin-nav-item" data-tab="cms"><span aria-hidden="true">✎</span> CMS Studio</button>
+        <button type="button" class="admin-nav-item" data-tab="seo"><span aria-hidden="true">◉</span> SEO & Settings</button>
+        <button type="button" class="admin-nav-item" data-tab="audit"><span aria-hidden="true">⚑</span> Security & Audit</button>
       </nav>
     </div>
     <div>
@@ -43,11 +43,12 @@
     </header>
 
     <div class="admin-content-scroll">
+      <div id="admin-status-banner" class="admin-status-banner" role="status" aria-live="polite" hidden></div>
       <section class="admin-tab-view active" id="tab-live">
         <div class="kpi-grid">
           <div class="kpi-card"><div class="kpi-title">Active Opt-In Sessions (Last 30m)</div><div class="kpi-value" id="live-session-count">0</div><div class="kpi-trend">● Live streaming telemetry</div></div>
           <div class="kpi-card"><div class="kpi-title">Total Tracked Events</div><div class="kpi-value" id="kpi-total-events">0</div><div class="kpi-trend">Non-PII business interactions</div></div>
-          <div class="kpi-card"><div class="kpi-title">Avg Session Dwell Time</div><div class="kpi-value" id="kpi-avg-dwell">2.4m</div><div class="kpi-trend">Deep engagement on capabilities</div></div>
+          <div class="kpi-card"><div class="kpi-title">Avg Session Dwell Time</div><div class="kpi-value" id="kpi-avg-dwell">—</div><div class="kpi-trend">Deep engagement on capabilities</div></div>
           <div class="kpi-card"><div class="kpi-title">Consent Policy</div><div class="kpi-value">Opt-In Required</div><div class="kpi-trend">Tracking starts only after visitor approval</div></div>
         </div>
         <div style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;"><h3 style="font-size: 1.1rem; color: #FFFFFF; font-weight: 600;">Active Visitor Registry</h3><span style="font-size: 0.75rem; color: var(--admin-text-muted);">Auto-refreshes every 15s</span></div>
