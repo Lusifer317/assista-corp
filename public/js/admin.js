@@ -125,6 +125,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       document.getElementById('live-session-count').textContent = sessions.length;
       document.getElementById('kpi-total-events').textContent = overview.totalEvents || 0;
+      const averageDwellSeconds = sessions.length
+        ? sessions.reduce((sum, session) => sum + (Number(session.dwell_seconds) || 0), 0) / sessions.length
+        : 0;
+      const averageDwell = document.getElementById('kpi-avg-dwell');
+      if (averageDwell) averageDwell.textContent = averageDwellSeconds >= 60
+        ? (averageDwellSeconds / 60).toFixed(1) + 'm'
+        : Math.round(averageDwellSeconds) + 's';
 
       const tbody = document.getElementById('live-sessions-tbody');
       tbody.innerHTML = '';
