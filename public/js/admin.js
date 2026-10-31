@@ -19,6 +19,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentUser = null;
   let currentActiveLeadId = null;
 
+  function showAdminStatus(message, kind = 'info') {
+    const banner = document.getElementById('admin-status-banner');
+    if (!banner) return;
+    banner.textContent = String(message || '');
+    banner.dataset.kind = kind;
+    banner.hidden = !message;
+  }
+
+  function clearAdminStatus() {
+    const banner = document.getElementById('admin-status-banner');
+    if (banner) {
+      banner.textContent = '';
+      banner.hidden = true;
+      delete banner.dataset.kind;
+    }
+  }
+
   // 1. Authenticate & initialize user
   try {
     const meRes = await fetch('/api/auth/me');
@@ -34,10 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('user-role').textContent = currentUser.role.toUpperCase();
     document.getElementById('user-initial').textContent = currentUser.name.charAt(0).toUpperCase();
 
-    if (!currentUser.mfa_enabled) {
-      document.getElementById('mfa-status-box').innerHTML = `
-        <span style="font-size:0.85rem; color:#F59E0B;">⚠ MFA Optional for this account</span>
-      `;
+    const mfaStatus = document.getElementById('mfa-status-box');
+    if (mfaStatus) {
+      mfaStatus.textContent = currentUser.mfa_enabled
+        ? '✓ Multi-factor authentication is active for this account.'
+        : '⚠ Multi-factor authentication is not enabled. Configure it before ending this session.';
+      mfaStatus.style.color = currentUser.mfa_enabled ? '#22C55E' : '#F59E0B';
     }
   } catch (err) {
     window.location.href = '/login';
@@ -46,8 +65,146 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. Sign Out
   document.getElementById('logout-btn').addEventListener('click', async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
+    const button = document.getElementById('logout-btn');
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (!response.ok) throw new Error('Sign out failed. Please retry.');
+      window.location.href = '/login';
+    } catch (error) {
+      button.disabled = false;
+      showAdminStatus(error.message || 'Unable to sign out.', 'error');
+    }
+  });
+
+  // MFA setup uses a pending server-side secret. The currently active key stays
+  // valid until this new key is verified, avoiding an accidental lockout.
+  const setupMfaButton = document.getElementById('setup-mfa-btn');
+  setupMfaButton?.addEventListener('click', async () => {
+    setupMfaButton.disabled = true;
+    showAdminStatus('Generating a new authenticator setup key…');
+    try {
+      const response = await fetch('/api/auth/mfa/setup', { method: 'POST' });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success || !data.secret) {
+        throw new Error(data.error || 'Unable to start authenticator setup.');
+      }
+
+      const statusBox = document.getElementById('mfa-status-box');
+      statusBox.replaceChildren();
+
+      const help = document.createElement('p');
+      help.textContent = 'Add this key to your authenticator app as a time-based (TOTP) account, then enter the current 6-digit code below. Your existing MFA key remains active until verification succeeds.';
+      statusBox.appendChild(help);
+
+      const keyLabel = document.createElement('label');
+      keyLabel.className = 'form-label';
+      keyLabel.textContent = 'Authenticator setup key';
+      keyLabel.style.display = 'block';
+      keyLabel.style.marginTop = '0.75rem';
+
+      const keyRow = document.createElement('div');
+      keyRow.style.display = 'flex';
+      keyRow.style.gap = '0.5rem';
+      keyRow.style.flexWrap = 'wrap';
+
+      const keyInput = document.createElement('input');
+      keyInput.type = 'text';
+      keyInput.readOnly = true;
+      keyInput.autocomplete = 'off';
+      keyInput.className = 'form-input';
+      keyInput.value = data.secret;
+      keyInput.setAttribute('aria-label', 'Authenticator setup key');
+      keyInput.style.flex = '1';
+      keyInput.style.minWidth = '220px';
+
+      const copyButton = document.createElement('button');
+      copyButton.type = 'button';
+      copyButton.className = 'btn btn-secondary';
+      copyButton.textContent = 'Copy key';
+      copyButton.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(data.secret);
+          copyButton.textContent = 'Copied';
+        } catch {
+          keyInput.focus();
+          keyInput.select();
+          copyButton.textContent = 'Select and copy';
+        }
+      });
+      keyRow.append(keyInput, copyButton);
+      statusBox.append(keyLabel, keyRow);
+
+      const codeLabel = document.createElement('label');
+      codeLabel.className = 'form-label';
+      codeLabel.textContent = '6-digit authenticator code';
+      codeLabel.style.display = 'block';
+      codeLabel.style.marginTop = '1rem';
+
+      const codeInput = document.createElement('input');
+      codeInput.type = 'text';
+      codeInput.inputMode = 'numeric';
+      codeInput.autocomplete = 'one-time-code';
+      codeInput.maxLength = 6;
+      codeInput.pattern = '[0-9]{6}';
+      codeInput.placeholder = '000000';
+      codeInput.className = 'form-input';
+      codeInput.style.maxWidth = '220px';
+
+      const verifyButton = document.createElement('button');
+      verifyButton.type = 'button';
+      verifyButton.className = 'btn btn-primary';
+      verifyButton.textContent = 'Verify and enable MFA';
+      verifyButton.style.display = 'block';
+      verifyButton.style.marginTop = '0.75rem';
+
+      const result = document.createElement('p');
+      result.setAttribute('role', 'status');
+      result.setAttribute('aria-live', 'polite');
+      result.style.marginTop = '0.5rem';
+      result.style.fontSize = '0.82rem';
+
+      verifyButton.addEventListener('click', async () => {
+        const code = codeInput.value.trim();
+        if (!/^\d{6}$/.test(code)) {
+          result.textContent = 'Enter all 6 digits from your authenticator.';
+          result.style.color = '#F59E0B';
+          codeInput.focus();
+          return;
+        }
+        verifyButton.disabled = true;
+        result.textContent = 'Verifying code…';
+        try {
+          const verifyResponse = await fetch('/api/auth/mfa/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+          });
+          const verifyData = await verifyResponse.json().catch(() => ({}));
+          if (!verifyResponse.ok || !verifyData.success) {
+            throw new Error(verifyData.error || 'Authenticator verification failed.');
+          }
+          currentUser.mfa_enabled = true;
+          statusBox.replaceChildren();
+          statusBox.textContent = '✓ Multi-factor authentication is active. The new authenticator key has been verified.';
+          statusBox.style.color = '#22C55E';
+          showAdminStatus('MFA successfully enabled for ' + currentUser.email + '.', 'success');
+        } catch (error) {
+          result.textContent = error.message || 'Verification failed. Try the next current code.';
+          result.style.color = '#FCA5A5';
+          verifyButton.disabled = false;
+          codeInput.focus();
+        }
+      });
+
+      statusBox.append(codeLabel, codeInput, verifyButton, result);
+      showAdminStatus('Authenticator setup key generated. Save it securely and verify a current code to activate it.', 'success');
+      codeInput.focus();
+    } catch (error) {
+      showAdminStatus(error.message || 'Unable to configure MFA.', 'error');
+    } finally {
+      setupMfaButton.disabled = false;
+    }
   });
 
   // 3. Tab Switching
@@ -77,10 +234,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   navItems.forEach(item => {
     item.addEventListener('click', () => {
       const tabId = item.dataset.tab;
-      navItems.forEach(i => i.classList.remove('active'));
+      navItems.forEach(i => {
+        i.classList.remove('active');
+        i.removeAttribute('aria-current');
+      });
       tabViews.forEach(v => v.classList.remove('active'));
 
       item.classList.add('active');
+      item.setAttribute('aria-current', 'page');
       const target = document.getElementById(`tab-${tabId}`);
       if (target) target.classList.add('active');
 
@@ -160,6 +321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     } catch (e) {
       console.error('Failed to load live sessions', e);
+      showAdminStatus('Live activity could not be loaded: ' + (e.message || 'request failed'), 'error');
     }
   }
 
@@ -218,8 +380,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       const countBadge = document.getElementById('count-' + stage);
       if (countBadge) countBadge.textContent = counts[stage] || 0;
     });
+    stages.forEach(stage => {
+      const container = document.getElementById('cards-' + stage);
+      if (container && counts[stage] === 0) {
+        const empty = document.createElement('p');
+        empty.className = 'form-help';
+        empty.style.fontSize = '0.78rem';
+        empty.textContent = cachedCRMLeads.length ? 'No leads in this stage.' : 'No submitted leads yet.';
+        container.appendChild(empty);
+      }
+    });
     const summary = document.getElementById('crm-filter-summary');
-    if (summary) summary.textContent = 'Showing ' + leads.length + ' of ' + cachedCRMLeads.length + ' leads';
+    if (summary) summary.textContent = cachedCRMLeads.length
+      ? 'Showing ' + leads.length + ' of ' + cachedCRMLeads.length + ' leads'
+      : 'No lead submissions are stored yet. New validated public inquiries will appear here.';
   }
 
   async function loadCRMLeads() {
@@ -231,6 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       applyCRMFilters();
     } catch (error) {
       console.error('Failed to load CRM leads', error);
+      showAdminStatus('CRM leads could not be loaded: ' + (error.message || 'request failed'), 'error');
     }
   }
 
@@ -256,7 +431,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
       const res = await fetch(`/api/admin/leads/${leadId}`);
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.lead) throw new Error(data.error || 'Unable to load this lead.');
       const lead = data.lead;
       const attribution = data.attribution;
 
@@ -342,14 +518,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!currentActiveLeadId) return;
     const newStatus = e.target.value;
     try {
-      await fetch(`/api/admin/leads/${currentActiveLeadId}/status`, {
+      const response = await fetch(`/api/admin/leads/${currentActiveLeadId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
-      loadCRMLeads();
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Status update failed.');
+      showAdminStatus('Lead status updated to ' + newStatus + '.', 'success');
+      await loadCRMLeads();
     } catch (err) {
-      alert('Failed to update status.');
+      showAdminStatus(err.message || 'Failed to update lead status.', 'error');
+      await loadCRMLeads();
     }
   });
 
@@ -365,36 +545,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ note })
       });
-      const data = await res.json();
-      if (res.ok) {
-        input.value = '';
-        renderNotes(data.notes || []);
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to save note.');
+      input.value = '';
+      renderNotes(data.notes || []);
+      showAdminStatus('Internal note saved.', 'success');
     } catch (err) {
-      alert('Failed to save note.');
+      showAdminStatus(err.message || 'Failed to save note.', 'error');
     }
   });
 
   // Export CSV
   document.getElementById('export-leads-btn').addEventListener('click', async () => {
-    const res = await fetch('/api/admin/leads');
-    const data = await res.json();
-    const leads = data.leads || [];
-
-    const headers = ['ID', 'Name', 'Email', 'Company', 'Industry', 'Status', 'Intent Score', 'Created At'];
-    const rows = leads.map(l => [
-      csvCell(l.id), csvCell(l.name), csvCell(l.business_email), csvCell(l.company),
-      csvCell(l.industry), csvCell(l.status), csvCell(l.intent_score), csvCell(l.created_at)
-    ]);
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const encodedUri = encodeURIComponent(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `assista_leads_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const button = document.getElementById('export-leads-btn');
+    button.disabled = true;
+    try {
+      const res = await fetch('/api/admin/leads');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to export leads.');
+      const leads = data.leads || [];
+      const headers = ['ID', 'Name', 'Email', 'Company', 'Industry', 'Status', 'Intent Score', 'Created At'];
+      const rows = leads.map(l => [
+        csvCell(l.id), csvCell(l.name), csvCell(l.business_email), csvCell(l.company),
+        csvCell(l.industry), csvCell(l.status), csvCell(l.intent_score), csvCell(l.created_at)
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+      const blobUrl = URL.createObjectURL(new Blob([csvContent], { type: 'text/csv;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `assista_leads_${Date.now()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(blobUrl);
+      showAdminStatus(`Exported ${leads.length} lead records.`, 'success');
+    } catch (error) {
+      showAdminStatus(error.message || 'Lead export failed.', 'error');
+    } finally {
+      button.disabled = false;
+    }
   });
 
   // -----------------------------------------------------------
@@ -427,6 +616,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         indContainer.appendChild(row);
       });
 
+      if (!indContainer.childElementCount) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No opted-in industry views recorded yet.';
+        empty.style.color = 'var(--admin-text-muted)';
+        empty.style.fontSize = '0.8rem';
+        indContainer.appendChild(empty);
+      }
+
       const capContainer = document.getElementById('intel-top-capabilities');
       capContainer.innerHTML = '';
       (overview.capabilityEvents || []).forEach(item => {
@@ -440,6 +637,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.innerHTML = `<span>${escapeHTML(item.category)}</span> <strong>${item.count} views</strong>`;
         capContainer.appendChild(row);
       });
+      if (!capContainer.childElementCount) {
+        const empty = document.createElement('p');
+        empty.textContent = 'No opted-in capability views recorded yet.';
+        empty.style.color = 'var(--admin-text-muted)';
+        empty.style.fontSize = '0.8rem';
+        capContainer.appendChild(empty);
+      }
       const renderMetricRows = (containerId, rows, labelKey, suffix) => {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -471,6 +675,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       renderMetricRows('intel-high-intent', overview.highIntentActions, 'event_type', ' actions');
     } catch (e) {
       console.error('Failed to load analytics', e);
+      showAdminStatus('Visitor analytics could not be loaded: ' + (e.message || 'request failed'), 'error');
     }
   }
 
@@ -696,13 +901,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         })
       });
 
-      if (res.ok) {
-        alert('Homepage Hero successfully updated.');
-      } else {
-        alert('Failed to update Hero content.');
-      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to update homepage hero.');
+      showAdminStatus('Homepage hero content saved.', 'success');
     } catch (err) {
-      alert('Error updating Hero content.');
+      showAdminStatus(err.message || 'Error updating homepage hero.', 'error');
     }
   });
 
@@ -712,7 +915,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadSettings() {
     try {
       const res = await fetch('/api/admin/settings');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to load corporate settings.');
       const settings = data.settings || {};
 
       if (settings.sales_email) document.getElementById('set-sales-email').value = settings.sales_email;
@@ -721,6 +925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (settings.turnstile_site_key) document.getElementById('set-turnstile-key').value = settings.turnstile_site_key;
     } catch (e) {
       console.error('Failed to load settings', e);
+      showAdminStatus(e.message || 'Failed to load corporate settings.', 'error');
     }
   }
 
@@ -739,10 +944,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) alert('Corporate settings saved successfully.');
-      else alert('Failed to save settings.');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to save corporate settings.');
+      showAdminStatus('Corporate settings saved: ' + (data.updated || []).join(', '), 'success');
     } catch (err) {
-      alert('Error saving settings.');
+      showAdminStatus(err.message || 'Error saving corporate settings.', 'error');
     }
   });
 
@@ -778,6 +984,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     } catch (e) {
       console.error('Failed to load audit logs', e);
+      showAdminStatus('Audit logs could not be loaded: ' + (e.message || 'request failed'), 'error');
     }
   }
 
