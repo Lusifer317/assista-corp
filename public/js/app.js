@@ -125,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         element.setAttribute(attribute, value);
       };
       setMeta('meta[name="description"]', 'content', seo.meta_description);
+      setMeta('meta[name="keywords"]', 'content', seo.keywords);
       setMeta('meta[property="og:title"]', 'content', seo.meta_title);
       setMeta('meta[property="og:description"]', 'content', seo.meta_description);
 
