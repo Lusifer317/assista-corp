@@ -947,6 +947,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const missing = [];
         if (!data.security?.turnstile_site_key_configured) missing.push('production site key');
         if (!data.security?.turnstile_secret_configured) missing.push('server secret in .env.production');
+        if (!data.security?.turnstile_action_configured) missing.push('TURNSTILE_EXPECTED_ACTION=contact');
+        if (!data.security?.turnstile_hostname_configured) missing.push('TURNSTILE_EXPECTED_HOSTNAME=assistacorp.com');
         if (!data.security?.cloudflare_csp_enabled) missing.push('CSP_ALLOW_CLOUDFLARE=true');
         showAdminStatus('Lead capture is not ready. Configure: ' + missing.join(', ') + '.', 'error');
       }
