@@ -36,7 +36,7 @@ assert.match(adminJs, /new Blob\(\[csvContent\]/,
   'Lead CSV export must use a valid Blob URL.');
 assert.match(adminJs, /No submitted leads yet/,
   'Empty CRM state must explain that no real submissions exist yet.');
-assert.match(adminJs, /Live lead capture is not configured/,
+assert.match(adminJs, /Lead capture is not ready/,
   'Admin settings must identify missing production Turnstile configuration.');
 
 const htmlForms = read('public/index.html') + read('public/contact.html');
