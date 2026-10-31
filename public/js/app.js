@@ -522,7 +522,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     submitButton.disabled = true;
     setTurnstileStatus(form, 'Loading security verification…');
     try {
-      const [sitekey] = await Promise.all([getTurnstileSiteKey(), loadTurnstileScript()]);
+      const sitekey = await getTurnstileSiteKey();
+      await loadTurnstileScript();
       const widgetId = window.turnstile.render(container, {
         sitekey,
         action: 'contact',
