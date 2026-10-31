@@ -170,63 +170,49 @@ document.addEventListener('DOMContentLoaded', async () => {
   let cachedCRMLeads = [];
 
   function renderCRMLeads(leads) {
-    try {
-      const res = await fetch('/api/admin/leads');
-      const data = await res.json();
-      const leads = cachedCRMLeads;
+    document.getElementById('crm-total-badge').textContent = cachedCRMLeads.length;
+    const stages = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'];
+    stages.forEach(stage => {
+      const container = document.getElementById('cards-' + stage);
+      const countBadge = document.getElementById('count-' + stage);
+      if (container) container.replaceChildren();
+      if (countBadge) countBadge.textContent = '0';
+    });
 
-      document.getElementById('crm-total-badge').textContent = cachedCRMLeads.length;
+    const counts = { New: 0, Contacted: 0, Qualified: 0, Proposal: 0, Won: 0, Lost: 0 };
+    leads.forEach(lead => {
+      const stage = stages.includes(lead.status) ? lead.status : 'New';
+      counts[stage] += 1;
+      const container = document.getElementById('cards-' + stage);
+      if (!container) return;
 
-      const stages = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'];
-      stages.forEach(stage => {
-        const container = document.getElementById(`cards-${stage}`);
-        const countBadge = document.getElementById(`count-${stage}`);
-        if (container) container.innerHTML = '';
-        if (countBadge) countBadge.textContent = '0';
-      });
+      const card = document.createElement('div');
+      card.className = 'lead-card';
+      const disciplines = Array.isArray(lead.team_configuration?.disciplines)
+        ? lead.team_configuration.disciplines
+        : Array.isArray(lead.requirements) ? lead.requirements : [];
+      const tagsHtml = disciplines.slice(0, 3).map(item => '<span class="lead-mini-tag">' + escapeHTML(item) + '</span>').join('');
+      card.innerHTML = \`
+        <div class="lead-card-header">
+          <span class="lead-score-pill" style="background:\${safeTierColor(lead.tier?.color)}; color:#FFF;">
+            \${escapeHTML(lead.tier?.tier || 'Lead')} • \${Number(lead.intent_score) || 0} pts
+          </span>
+          <span style="font-size:0.7rem; color:var(--admin-text-muted);">#\${escapeHTML(lead.id)}</span>
+        </div>
+        <div class="lead-company-title">\${escapeHTML(lead.company)}</div>
+        <div class="lead-name-sub">\${escapeHTML(lead.name)} (\${escapeHTML(lead.industry)})</div>
+        <div class="lead-disciplines-tags">\${tagsHtml}</div>
+      \`;
+      card.addEventListener('click', () => openLeadDossier(lead.id));
+      container.appendChild(card);
+    });
 
-      const counts = { New: 0, Contacted: 0, Qualified: 0, Proposal: 0, Won: 0, Lost: 0 };
-
-      leads.forEach(lead => {
-        const stage = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'].includes(lead.status) ? lead.status : 'New';
-        if (counts[stage] !== undefined) counts[stage]++;
-
-        const container = document.getElementById(`cards-${stage}`) || document.getElementById('cards-New');
-        if (!container) return;
-
-        const card = document.createElement('div');
-        card.className = 'lead-card';
-
-        let disciplines = [];
-        try {
-          disciplines = lead.team_configuration?.disciplines || lead.requirements || [];
-        } catch (e) {}
-
-        const tagsHtml = disciplines.slice(0, 3).map(d => `<span class="lead-mini-tag">${escapeHTML(d)}</span>`).join('');
-
-        card.innerHTML = `
-          <div class="lead-card-header">
-            <span class="lead-score-pill" style="background:${safeTierColor(lead.tier?.color)}; color:#FFF;">
-              ${escapeHTML(lead.tier?.tier || 'Lead')} • ${lead.intent_score} pts
-            </span>
-            <span style="font-size:0.7rem; color:var(--admin-text-muted);">#${lead.id}</span>
-          </div>
-          <div class="lead-company-title">${escapeHTML(lead.company)}</div>
-          <div class="lead-name-sub">${escapeHTML(lead.name)} (${escapeHTML(lead.industry)})</div>
-          <div class="lead-disciplines-tags">${tagsHtml}</div>
-        `;
-
-        card.addEventListener('click', () => openLeadDossier(lead.id));
-        container.appendChild(card);
-      });
-
-      stages.forEach(stage => {
-        const countBadge = document.getElementById(`count-${stage}`);
-        if (countBadge) countBadge.textContent = counts[stage] || 0;
-      });
-    } catch (e) {
-      console.error('Failed to load CRM leads', e);
-    }
+    stages.forEach(stage => {
+      const countBadge = document.getElementById('count-' + stage);
+      if (countBadge) countBadge.textContent = counts[stage] || 0;
+    });
+    const summary = document.getElementById('crm-filter-summary');
+    if (summary) summary.textContent = 'Showing ' + leads.length + ' of ' + cachedCRMLeads.length + ' leads';
   }
 
   async function loadCRMLeads() {
