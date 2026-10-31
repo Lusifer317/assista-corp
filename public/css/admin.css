@@ -43,6 +43,12 @@ body.admin-body {
 }
 
 .admin-nav-item {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  background: transparent;
+  text-align: left;
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -412,4 +418,39 @@ body.admin-body {
   font-weight: 800;
   text-transform: uppercase;
   font-size: 0.72rem;
+}
+
+.admin-status-banner {
+  border: 1px solid rgba(180, 227, 0, 0.28);
+  border-radius: 8px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.25rem;
+  color: var(--admin-text-main);
+  background: rgba(180, 227, 0, 0.07);
+  font-size: 0.84rem;
+}
+.admin-status-banner[data-kind="error"] {
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #FCA5A5;
+  background: rgba(127, 29, 29, 0.16);
+}
+.admin-status-banner[data-kind="success"] {
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86EFAC;
+  background: rgba(20, 83, 45, 0.16);
+}
+
+.admin-nav-item:focus-visible,
+.admin-main button:focus-visible,
+.admin-main a:focus-visible,
+.admin-main input:focus-visible,
+.admin-main select:focus-visible,
+.admin-main textarea:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+.admin-nav-item:disabled,
+.admin-main button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }

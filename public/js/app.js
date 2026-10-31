@@ -456,10 +456,129 @@ document.addEventListener('DOMContentLoaded', async () => {
   const formSuccessBox = document.getElementById('form-success-box');
   const formStatusMsg = document.getElementById('form-status-msg');
 
+  const turnstileWidgetIds = new WeakMap();
+  let turnstileSiteKeyPromise = null;
+  let turnstileScriptPromise = null;
+
+  function setTurnstileStatus(form, message, isError = false) {
+    const status = form?.querySelector('[data-turnstile-status]');
+    if (!status) return;
+    status.textContent = message;
+    status.style.color = isError ? '#B91C1C' : 'var(--text-secondary, #5B6472)';
+  }
+
+  async function getTurnstileSiteKey() {
+    if (!turnstileSiteKeyPromise) {
+      turnstileSiteKeyPromise = fetch('/api/settings/public', { cache: 'no-store' })
+        .then(async response => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(data.error || 'Could not load form security configuration.');
+          const key = String(data.settings?.turnstile_site_key || '').trim();
+          if (!data.turnstile_ready || !key || key === '1x00000000000000000000AA') {
+            throw new Error('Online inquiries are temporarily unavailable. The administrator must configure a live Turnstile site key, matching server secret, expected action and hostname, and Cloudflare CSP allowance.');
+          }
+          return key;
+        })
+        .catch(error => {
+          turnstileSiteKeyPromise = null;
+          throw error;
+        });
+    }
+    return turnstileSiteKeyPromise;
+  }
+
+  async function loadTurnstileScript() {
+    if (window.turnstile) return window.turnstile;
+    if (!turnstileScriptPromise) {
+      turnstileScriptPromise = new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-turnstile-api]');
+        const script = existing || document.createElement('script');
+        const timeout = window.setTimeout(() => reject(new Error('Cloudflare verification script timed out. Please retry.')), 12000);
+        const finish = (error) => {
+          window.clearTimeout(timeout);
+          if (error) reject(error);
+          else if (window.turnstile) resolve(window.turnstile);
+          else reject(new Error('Cloudflare verification could not initialize.'));
+        };
+        script.addEventListener('load', () => finish(), { once: true });
+        script.addEventListener('error', () => finish(new Error('Cloudflare verification could not load. Check CSP and network access.')), { once: true });
+        if (!existing) {
+          script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+          script.async = true;
+          script.defer = true;
+          script.dataset.turnstileApi = 'true';
+          document.head.appendChild(script);
+        } else if (window.turnstile) {
+          finish();
+        }
+      }).catch(error => {
+        turnstileScriptPromise = null;
+        throw error;
+      });
+    }
+    return turnstileScriptPromise;
+  }
+
+  async function mountTurnstile(form) {
+    if (!form || turnstileWidgetIds.has(form)) return;
+    const submitButton = form.querySelector('button[type="submit"]');
+    const tokenInput = form.querySelector('input[name="turnstile_token"]');
+    const container = form.querySelector('[data-turnstile-widget]');
+    if (!submitButton || !tokenInput || !container) return;
+
+    submitButton.disabled = true;
+    setTurnstileStatus(form, 'Loading security verification…');
+    try {
+      const sitekey = await getTurnstileSiteKey();
+      await loadTurnstileScript();
+      const widgetId = window.turnstile.render(container, {
+        sitekey,
+        action: 'contact',
+        callback(token) {
+          tokenInput.value = token;
+          submitButton.disabled = false;
+          setTurnstileStatus(form, 'Security verification complete.');
+        },
+        'error-callback'() {
+          tokenInput.value = '';
+          submitButton.disabled = true;
+          setTurnstileStatus(form, 'Security verification failed to load. Retry the challenge or refresh the page.', true);
+        },
+        'expired-callback'() {
+          tokenInput.value = '';
+          submitButton.disabled = true;
+          setTurnstileStatus(form, 'Verification expired. Complete the challenge again.');
+        },
+        'timeout-callback'() {
+          tokenInput.value = '';
+          submitButton.disabled = true;
+          setTurnstileStatus(form, 'Verification timed out. Complete the challenge again.');
+        }
+      });
+      turnstileWidgetIds.set(form, widgetId);
+    } catch (error) {
+      submitButton.disabled = true;
+      setTurnstileStatus(form, error.message || 'Security verification is unavailable.', true);
+    }
+  }
+
+  function resetTurnstile(form) {
+    const tokenInput = form?.querySelector('input[name="turnstile_token"]');
+    const widgetId = form && turnstileWidgetIds.get(form);
+    if (tokenInput) tokenInput.value = '';
+    if (form && widgetId && window.turnstile) {
+      try { window.turnstile.reset(widgetId); } catch {}
+    }
+    const submitButton = form?.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.disabled = true;
+    if (form) setTurnstileStatus(form, 'Complete the security challenge to submit.');
+  }
+
   function openModal(source = 'general') {
     if (modalOverlay) {
       modalOverlay.classList.add('open');
       document.body.style.overflow = 'hidden';
+      mountTurnstile(inquiryForm);
 
       if (window.AssistaAnalytics) {
         window.AssistaAnalytics.recordEvent('contact_opened', {
@@ -514,16 +633,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         business_email: formData.get('email'),
         company: formData.get('company'),
         industry: formData.get('industry'),
-        requirements: ['Executive Support', 'Operations'],
-        team_configuration: {
-          disciplines: ['Dedicated Client Cell'],
-          estimatedHours: '40 hrs/wk',
-          coverage: 'Dedicated Squad'
-        },
+        // This form does not ask for a service scope or squad size. Keep those
+        // fields empty rather than inventing requirements or staffing estimates.
+        requirements: [],
+        team_configuration: {},
         message: formData.get('message'),
         session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
-        turnstile_token: formData.get('turnstile_token') || 'cf_turnstile_pass_token_demo'
+        turnstile_token: formData.get('turnstile_token') || ''
       };
+
+      if (!payload.turnstile_token) {
+        alert('Complete the security verification before submitting your inquiry.');
+        submitBtn.disabled = true;
+        submitBtn.textContent = originalText;
+        return;
+      }
 
       try {
         const response = await fetch('/api/leads/submit', {
@@ -559,12 +683,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         } else {
           alert(resData.error || 'Failed to submit inquiry. Please verify information.');
-          submitBtn.disabled = false;
+          resetTurnstile(inquiryForm);
           submitBtn.textContent = originalText;
         }
       } catch (err) {
-        alert('A network error occurred. Please try again.');
-        submitBtn.disabled = false;
+        alert(err.message || 'A network error occurred. Please try again.');
+        resetTurnstile(inquiryForm);
         submitBtn.textContent = originalText;
       }
     });
@@ -574,6 +698,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const contactPageForm = document.getElementById('contact-page-form');
   const contactPageSuccess = document.getElementById('contact-page-success');
   if (contactPageForm) {
+    mountTurnstile(contactPageForm);
     contactPageForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const submitBtn = contactPageForm.querySelector('button[type="submit"]');
@@ -594,8 +719,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         message: formData.get('message'),
         session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
-        turnstile_token: formData.get('turnstile_token') || 'cf_turnstile_pass_token_demo'
+        turnstile_token: formData.get('turnstile_token') || ''
       };
+
+      if (!payload.turnstile_token) {
+        alert('Complete the security verification before submitting your inquiry.');
+        submitBtn.disabled = true;
+        submitBtn.textContent = originalText;
+        return;
+      }
 
       try {
         const response = await fetch('/api/leads/submit', {
@@ -603,18 +735,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const resData = await response.json();
+        const resData = await response.json().catch(() => ({}));
         if (response.ok) {
           contactPageForm.style.display = 'none';
           if (contactPageSuccess) contactPageSuccess.style.display = 'block';
         } else {
           alert(resData.error || 'Failed to submit inquiry. Please verify information.');
-          submitBtn.disabled = false;
+          resetTurnstile(contactPageForm);
           submitBtn.textContent = originalText;
         }
       } catch (err) {
-        alert('A network error occurred. Please try again.');
-        submitBtn.disabled = false;
+        alert(err.message || 'A network error occurred. Please try again.');
+        resetTurnstile(contactPageForm);
         submitBtn.textContent = originalText;
       }
     });

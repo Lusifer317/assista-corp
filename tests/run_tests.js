@@ -14,6 +14,7 @@ const { buildCsp } = require('../lib/csp');
 console.log('--- RUNNING ASSISTA CORP TEST SUITE ---');
 
 require('./test_login_page'); console.log('✓ Test 0: Operations login CSP and credential exposure');
+require('./test_admin_runtime'); console.log('✓ Test 0a: Admin portal runtime and production form safeguards');
 
 {
   const pwd='TestSecretPassword2026!'; const {hash,salt}=hashPassword(pwd);
