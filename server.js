@@ -86,7 +86,16 @@ const server=http.createServer(async(req,res)=>{
     if(method==='GET'&&pathname==='/api/testimonials')return sendJSON(res,{testimonials:db.prepare('SELECT * FROM testimonials ORDER BY sort_order ASC').all()});
     if(method==='GET'&&pathname==='/api/team')return sendJSON(res,{team:db.prepare('SELECT * FROM team ORDER BY sort_order ASC').all()});
     if(method==='GET'&&pathname==='/api/insights')return sendJSON(res,{insights:db.prepare('SELECT * FROM insights ORDER BY published_at DESC').all()});
-    if(method==='GET'&&pathname==='/api/settings/public'){const rows=db.prepare('SELECT key,value FROM settings').all();const settings={};rows.forEach(s=>settings[s.key]=s.value);delete settings.turnstile_secret_key;return sendJSON(res,{settings});}
+    if(method==='GET'&&pathname==='/api/settings/public'){
+      const rows=db.prepare('SELECT key,value FROM settings').all();
+      const settings={};
+      rows.forEach(s=>settings[s.key]=s.value);
+      delete settings.turnstile_secret_key;
+      const hasSiteKey=Boolean(settings.turnstile_site_key&&settings.turnstile_site_key!=='1x00000000000000000000AA');
+      const turnstileReady=hasSiteKey&&Boolean(process.env.TURNSTILE_SECRET_KEY)&&process.env.CSP_ALLOW_CLOUDFLARE==='true';
+      if(!turnstileReady)delete settings.turnstile_site_key;
+      return sendJSON(res,{settings,turnstile_ready:turnstileReady});
+    }
     if(method==='GET'&&pathname==='/api/seo'){const route=parsedUrl.query.route||'/';const seo=db.prepare('SELECT * FROM seo_metadata WHERE route=?').get(route)||{meta_title:'ASSISTA CORP | The People Behind Business.',meta_description:'Global Business Services platform giving businesses the dedicated people they need to move forward.',canonical_url:'https://assistacorp.com'};return sendJSON(res,{seo});}
 
     if(method==='POST'&&pathname==='/api/analytics/session'){if(!checkRateLimit(clientIp,30,60000))return sendError(res,'Analytics request limit reached.',429);const body=await parseBody(req);if(body.consentStatus!=='granted')return sendError(res,'Explicit analytics consent is required.',400);const session=recordSession({sessionId:body.sessionId,referrer:body.referrer,userAgent:req.headers['user-agent']||'',region:body.region||'Global',consentStatus:'granted'});if(!session)return sendError(res,'Invalid analytics session.',400);return sendJSON(res,{success:true,session});}
@@ -139,7 +148,16 @@ const server=http.createServer(async(req,res)=>{
       if(method==='PUT'&&pathname.startsWith('/api/admin/industries/')){if(!requirePermissionOr403(res,user,PERMISSIONS.EDIT_INDUSTRIES))return;const id=pathname.replace('/api/admin/industries/','');if(!/^\\d+$/.test(id))return sendError(res,'Invalid industry identifier.',400);const body=await parseBody(req);const headline=boundedText(body.headline,240,true);const subheadline=boundedText(body.subheadline,600,true);const caseSnapshot=boundedText(body.case_snapshot,3000,true);const workflows=boundedStringArray(body.off_their_plate,30,300);if(headline===null||subheadline===null||caseSnapshot===null||workflows===null)return sendError(res,'Invalid industry fields or limits exceeded.',400);const result=db.prepare('UPDATE industries SET headline=?,subheadline=?,off_their_plate=?,case_snapshot=? WHERE id=?').run(headline,subheadline,JSON.stringify(workflows),caseSnapshot,id);if(!result.changes)return sendError(res,'Industry not found.',404);logAction({userId:user.user_id,userEmail:user.email,action:'INDUSTRY_UPDATE',entityType:'industries',entityId:id,details:{id},ipAddress:clientIp});return sendJSON(res,{success:true});}
       if(method==='GET'&&pathname==='/api/admin/seo'){if(!requirePermissionOr403(res,user,PERMISSIONS.EDIT_SEO))return;return sendJSON(res,{seoList:db.prepare('SELECT * FROM seo_metadata').all()});}
       if(method==='PUT'&&pathname.startsWith('/api/admin/seo/')){if(!requirePermissionOr403(res,user,PERMISSIONS.EDIT_SEO))return;const id=pathname.replace('/api/admin/seo/','');if(!/^\\d+$/.test(id))return sendError(res,'Invalid SEO record identifier.',400);const body=await parseBody(req);const title=boundedText(body.meta_title,100,true);const description=boundedText(body.meta_description,320,true);const ogImage=safeHttpsUrl(body.og_image,500);const canonical=safeHttpsUrl(body.canonical_url,500);const keywords=boundedText(body.keywords,400);if(title===null||description===null||ogImage===null||canonical===null||keywords===null)return sendError(res,'Invalid SEO metadata. URLs must use HTTPS and text must be within the field limits.',400);const result=db.prepare('UPDATE seo_metadata SET meta_title=?,meta_description=?,og_image=?,canonical_url=?,keywords=? WHERE id=?').run(title,description,ogImage,canonical,keywords,id);if(!result.changes)return sendError(res,'SEO record not found.',404);logAction({userId:user.user_id,userEmail:user.email,action:'SEO_UPDATE',entityType:'seo_metadata',entityId:id,ipAddress:clientIp});return sendJSON(res,{success:true});}
-      if(method==='GET'&&pathname==='/api/admin/settings'){if(!requirePermissionOr403(res,user,PERMISSIONS.VIEW_SETTINGS))return;const settings=db.prepare('SELECT key,value FROM settings').all();const map={};settings.forEach(s=>{if(!/(secret|token|password|private|credential)/i.test(s.key))map[s.key]=s.value;});return sendJSON(res,{settings:map});}
+      if(method==='GET'&&pathname==='/api/admin/settings'){
+        if(!requirePermissionOr403(res,user,PERMISSIONS.VIEW_SETTINGS))return;
+        const settings=db.prepare('SELECT key,value FROM settings').all();
+        const map={};
+        settings.forEach(s=>{if(!/(secret|token|password|private|credential)/i.test(s.key))map[s.key]=s.value;});
+        const siteKeyConfigured=Boolean(map.turnstile_site_key&&map.turnstile_site_key!=='1x00000000000000000000AA');
+        const secretConfigured=Boolean(process.env.TURNSTILE_SECRET_KEY);
+        const cspConfigured=process.env.CSP_ALLOW_CLOUDFLARE==='true';
+        return sendJSON(res,{settings:map,security:{turnstile_site_key_configured:siteKeyConfigured,turnstile_secret_configured:secretConfigured,cloudflare_csp_enabled:cspConfigured,turnstile_ready:siteKeyConfigured&&secretConfigured&&cspConfigured}});
+      }
       if(method==='PUT'&&pathname==='/api/admin/settings'){
         if(!requirePermissionOr403(res,user,PERMISSIONS.EDIT_SETTINGS))return;
         const body=await parseBody(req);
