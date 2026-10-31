@@ -1,4 +1,6 @@
 const assert = require('node:assert');
+const { execFileSync } = require('node:child_process');
+const path = require('node:path');
 const { db } = require('../lib/db');
 const { hashPassword, verifyPassword, createSession, validateSession, generateBase32Secret, generateTOTP, verifyTOTP } = require('../lib/auth');
 const { createCsrfToken, validateCsrf } = require('../lib/csrf');
@@ -43,8 +45,12 @@ console.log('--- RUNNING ASSISTA CORP TEST SUITE ---');
   const csp=buildCsp('abc123'); assert.match(csp,/default-src 'self'/); assert.match(csp,/object-src 'none'/); assert.match(csp,/frame-ancestors 'self'/); assert.match(csp,/nonce-abc123/); console.log('✓ Test 10: CSP policy builder');
 }
 
-require('./test_logo_and_layout'); console.log('✓ Test 11: Brand logo/layout integrity');
-require('./test_responsive'); console.log('✓ Test 12: Responsive architecture');
+const analyticsResetDryRun = execFileSync(process.execPath, [path.join(__dirname, '../scripts/reset-legacy-analytics.js')], { encoding: 'utf8' });
+assert.match(analyticsResetDryRun, /DRY RUN ONLY/);
+console.log('✓ Test 11: Legacy analytics cleanup defaults to dry-run');
 
-async function runAll(){const {runRouteTests}=require('./test_routes'); await runRouteTests(); console.log('✓ Test 13: Routing suite'); console.log('\nALL TESTS COMPLETED SUCCESSFULLY.');}
+require('./test_logo_and_layout'); console.log('✓ Test 12: Brand logo/layout integrity');
+require('./test_responsive'); console.log('✓ Test 13: Responsive architecture');
+
+async function runAll(){const {runRouteTests}=require('./test_routes'); await runRouteTests(); console.log('✓ Test 14: Routing suite'); console.log('\nALL TESTS COMPLETED SUCCESSFULLY.');}
 runAll().then(()=>process.exit(0)).catch(err=>{console.error(err);process.exit(1);});
