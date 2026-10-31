@@ -167,15 +167,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   // -----------------------------------------------------------
   // 5. CRM Pipeline & Kanban Board
   // -----------------------------------------------------------
-  async function loadCRMLeads() {
+  let cachedCRMLeads = [];
+
+  function renderCRMLeads(leads) {
     try {
       const res = await fetch('/api/admin/leads');
       const data = await res.json();
-      const leads = data.leads || [];
+      const leads = cachedCRMLeads;
 
-      document.getElementById('crm-total-badge').textContent = leads.length;
+      document.getElementById('crm-total-badge').textContent = cachedCRMLeads.length;
 
-      const stages = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won'];
+      const stages = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'];
       stages.forEach(stage => {
         const container = document.getElementById(`cards-${stage}`);
         const countBadge = document.getElementById(`count-${stage}`);
@@ -183,10 +185,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (countBadge) countBadge.textContent = '0';
       });
 
-      const counts = { New: 0, Contacted: 0, Qualified: 0, Proposal: 0, Won: 0 };
+      const counts = { New: 0, Contacted: 0, Qualified: 0, Proposal: 0, Won: 0, Lost: 0 };
 
       leads.forEach(lead => {
-        const stage = lead.status || 'New';
+        const stage = ['New', 'Contacted', 'Qualified', 'Proposal', 'Won', 'Lost'].includes(lead.status) ? lead.status : 'New';
         if (counts[stage] !== undefined) counts[stage]++;
 
         const container = document.getElementById(`cards-${stage}`) || document.getElementById('cards-New');
@@ -226,6 +228,32 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error('Failed to load CRM leads', e);
     }
   }
+
+  async function loadCRMLeads() {
+    try {
+      const res = await fetch('/api/admin/leads');
+      if (!res.ok) throw new Error('Unable to load leads.');
+      const data = await res.json();
+      cachedCRMLeads = data.leads || [];
+      applyCRMFilters();
+    } catch (error) {
+      console.error('Failed to load CRM leads', error);
+    }
+  }
+
+  function applyCRMFilters() {
+    const search = (document.getElementById('crm-search')?.value || '').trim().toLowerCase();
+    const stage = document.getElementById('crm-status-filter')?.value || 'all';
+    const filtered = cachedCRMLeads.filter(lead => {
+      const haystack = [lead.name, lead.company, lead.business_email, lead.industry, lead.status]
+        .map(value => String(value || '').toLowerCase()).join(' ');
+      return (!search || haystack.includes(search)) && (stage === 'all' || lead.status === stage);
+    });
+    renderCRMLeads(filtered);
+  }
+
+  document.getElementById('crm-search')?.addEventListener('input', applyCRMFilters);
+  document.getElementById('crm-status-filter')?.addEventListener('change', applyCRMFilters);
 
   // Lead Dossier Modal
   async function openLeadDossier(leadId) {
