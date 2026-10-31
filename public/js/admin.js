@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const TAB_META = {
-    live: { title: 'Live Anonymous Activity', subtitle: 'Real-time first-party visitor sessions and touchpoint telemetry (Zero PII)' },
+    live: { title: 'Live Visitor Activity', subtitle: 'Real-time opted-in first-party visitor sessions and touchpoint telemetry' },
     crm: { title: 'CRM Pipeline & Lead Intelligence', subtitle: 'Track prospective partnerships from anonymous exploration to dedicated squad deployment' },
     analytics: { title: 'Visitor Intelligence & Analytics', subtitle: 'Aggregate insight into high-intent actions, top capabilities, and industry demand' },
     cms: { title: 'CMS Content Studio', subtitle: 'Modify brand narrative, hero manifesto, and capability universe specifications' },
