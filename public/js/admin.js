@@ -924,12 +924,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (!res.ok) throw new Error(data.error || 'Unable to load corporate settings.');
       const settings = data.settings || {};
 
-      if (settings.sales_email) document.getElementById('set-sales-email').value = settings.sales_email;
-      if (settings.phone) document.getElementById('set-phone').value = settings.phone;
-      if (settings.headquarters) document.getElementById('set-hq').value = settings.headquarters;
-      if (settings.turnstile_site_key) document.getElementById('set-turnstile-key').value = settings.turnstile_site_key;
-      if (!settings.turnstile_site_key || settings.turnstile_site_key === '1x00000000000000000000AA') {
-        showAdminStatus('Live lead capture is not configured: add a production Cloudflare Turnstile site key here and configure its matching secret in the server environment.', 'error');
+      if (settings.sales_email !== undefined) document.getElementById('set-sales-email').value = settings.sales_email;
+      if (settings.phone !== undefined) document.getElementById('set-phone').value = settings.phone;
+      if (settings.headquarters !== undefined) document.getElementById('set-hq').value = settings.headquarters;
+      const isTestSiteKey = settings.turnstile_site_key === '1x00000000000000000000AA';
+      document.getElementById('set-turnstile-key').value = settings.turnstile_site_key && !isTestSiteKey ? settings.turnstile_site_key : '';
+      if (!data.security?.turnstile_ready) {
+        const missing = [];
+        if (!data.security?.turnstile_site_key_configured) missing.push('production site key');
+        if (!data.security?.turnstile_secret_configured) missing.push('server secret in .env.production');
+        if (!data.security?.cloudflare_csp_enabled) missing.push('CSP_ALLOW_CLOUDFLARE=true');
+        showAdminStatus('Lead capture is not ready. Configure: ' + missing.join(', ') + '.', 'error');
       }
     } catch (e) {
       console.error('Failed to load settings', e);
@@ -955,6 +960,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Failed to save corporate settings.');
       showAdminStatus('Corporate settings saved: ' + (data.updated || []).join(', '), 'success');
+      await loadSettings();
     } catch (err) {
       showAdminStatus(err.message || 'Error saving corporate settings.', 'error');
     }
