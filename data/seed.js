@@ -677,11 +677,11 @@ function seedDatabase() {
   insertSetting.run('company_name', 'ASSISTA CORP');
   insertSetting.run('brand_tagline', 'The People Behind Business.');
   insertSetting.run('sales_email', 'sales@assistacorp.com');
-  insertSetting.run('phone', '+1 (800) 492-7718');
-  insertSetting.run('headquarters', '350 Fifth Avenue, 54th Floor, New York, NY 10118');
-  insertSetting.run('european_office', '100 Bishopsgate, London EC2N 4AG, United Kingdom');
-  insertSetting.run('turnstile_site_key', '1x00000000000000000000AA'); // Cloudflare test pass key
-  insertSetting.run('turnstile_secret_key', '1x0000000000000000000000000000000AA'); // Cloudflare test pass secret
+  insertSetting.run('phone', '');
+  insertSetting.run('headquarters', '');
+  insertSetting.run('european_office', '');
+  // Configure the production Turnstile sitekey in the admin portal and the
+  // matching secret in the runtime environment. Do not seed test credentials.
 
   // 10. Seed SEO
   db.exec('DELETE FROM seo_metadata');
