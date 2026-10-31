@@ -185,9 +185,53 @@ document.addEventListener('DOMContentLoaded', async () => {
           });
         }
         if (roles) roles.textContent = (service.team_roles || []).slice(0, 3).join(' · ');
+        card.addEventListener('click', () => {
+          window.AssistaAnalytics?.recordEvent('service_view', { category: service.category, service: service.slug });
+        }, { once: true });
       });
     } catch (error) {
       console.warn('Services content could not be loaded; using page defaults.', error);
+    }
+  }
+
+  async function hydrateServiceDetailPage() {
+    const routes = {
+      '/services/executive-support': 'executive-support',
+      '/services/finance-reconciliation': 'finance-accounting',
+      '/services/customer-care': 'customer-support',
+      '/services/recruitment-talent': 'recruitment-talent'
+    };
+    const slug = routes[window.location.pathname.replace(/\/$/, '')];
+    if (!slug) return;
+    try {
+      const response = await fetch('/api/services/' + encodeURIComponent(slug));
+      if (!response.ok) return;
+      const { service } = await response.json();
+      if (!service) return;
+      const title = document.querySelector('.page-hero-title');
+      const lead = document.querySelector('.page-hero-lead');
+      const summary = document.querySelector('.section-desc');
+      if (title) title.textContent = service.name;
+      if (lead) lead.textContent = service.tagline;
+      if (summary && service.description) summary.textContent = service.description;
+      const grid = document.querySelector('.who-for-grid');
+      if (grid) {
+        grid.replaceChildren();
+        (service.deliverables || []).forEach(deliverable => {
+          const card = document.createElement('div');
+          card.className = 'who-for-card';
+          const heading = document.createElement('h3');
+          heading.className = 'who-for-title';
+          heading.textContent = String(deliverable);
+          card.appendChild(heading);
+          grid.appendChild(card);
+        });
+      }
+      const crumb = document.querySelector('.breadcrumb-item.active');
+      if (crumb) crumb.textContent = service.name;
+      window.AssistaAnalytics?.recordEvent('service_view', { category: service.category, service: service.slug });
+    } catch (error) {
+      console.warn('Service details could not be loaded; using page defaults.', error);
     }
   }
 
@@ -253,6 +297,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (summary && industry.subheadline) summary.textContent = industry.subheadline;
         renderIndustryWorkflows(grid, industry.off_their_plate || []);
       });
+
+      if ('IntersectionObserver' in window && window.AssistaAnalytics) {
+        const observed = new Set();
+        const observer = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const name = entry.target.dataset.analyticsIndustry;
+            if (!name || observed.has(name)) return;
+            observed.add(name);
+            window.AssistaAnalytics.recordEvent('industry_view', { industry: name });
+            observer.unobserve(entry.target);
+          });
+        }, { threshold: 0.35 });
+        (industries || []).forEach(industry => {
+          const section = document.getElementById(({ finance: 'wealth' }[industry.slug]) || industry.slug);
+          if (section && !section.dataset.analyticsIndustry) {
+            section.dataset.analyticsIndustry = industry.name || industry.slug;
+            observer.observe(section);
+          }
+        });
+      }
     } catch (error) {
       console.warn('Industry content could not be loaded; using page defaults.', error);
     }
@@ -261,6 +326,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   hydrateHomepageHero();
   hydrateSeoMetadata();
   hydrateServicesPage();
+  hydrateServiceDetailPage();
   hydrateIndustryPage();
 
   // -----------------------------------------------------------
