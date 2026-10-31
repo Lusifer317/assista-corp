@@ -55,6 +55,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tabViews = document.querySelectorAll('.admin-tab-view');
   const tabTitle = document.getElementById('tab-title');
   const tabSubtitle = document.getElementById('tab-subtitle');
+  if (currentUser.role === 'sales') {
+    navItems.forEach(item => {
+      if (['cms', 'seo', 'audit'].includes(item.dataset.tab)) item.hidden = true;
+    });
+  }
+  if (currentUser.role === 'editor') {
+    const settingsForm = document.getElementById('settings-form');
+    settingsForm?.closest('.cms-editor-panel')?.setAttribute('hidden', '');
+  }
 
   const TAB_META = {
     live: { title: 'Live Anonymous Activity', subtitle: 'Real-time first-party visitor sessions and touchpoint telemetry (Zero PII)' },
@@ -98,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (activeTab === 'analytics') loadAnalytics();
     if (activeTab === 'audit') loadAuditLogs();
     if (activeTab === 'cms') loadCMS();
-    if (activeTab === 'seo') { loadSettings(); }
+    if (activeTab === 'seo') { loadSettings(); loadCMS(); }
   });
 
   // -----------------------------------------------------------
