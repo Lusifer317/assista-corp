@@ -414,46 +414,200 @@ document.addEventListener('DOMContentLoaded', async () => {
   // -----------------------------------------------------------
   // 7. CMS Studio
   // -----------------------------------------------------------
+  let cmsHeroData = {};
+
+  function makeCMSField(labelText, initialValue, multiline = false) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'form-group';
+    const label = document.createElement('label');
+    label.className = 'form-label';
+    label.textContent = labelText;
+    const control = document.createElement(multiline ? 'textarea' : 'input');
+    control.className = multiline ? 'form-textarea' : 'form-input';
+    if (multiline) control.rows = 3;
+    control.value = initialValue == null ? '' : String(initialValue);
+    wrapper.append(label, control);
+    return { wrapper, control };
+  }
+
+  function parseStoredList(value) {
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') {
+      try {
+        const parsed = JSON.parse(value);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {}
+      return value.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+    }
+    return [];
+  }
+
+  function renderRecordEditors(container, records, definitions) {
+    container.replaceChildren();
+    if (!Array.isArray(records) || records.length === 0) {
+      const empty = document.createElement('p');
+      empty.className = 'form-help';
+      empty.textContent = 'No records are available for editing.';
+      container.appendChild(empty);
+      return;
+    }
+
+    records.forEach(record => {
+      const panel = document.createElement('div');
+      panel.className = 'cms-editor-panel';
+      panel.style.marginBottom = '1rem';
+      const heading = document.createElement('h4');
+      heading.textContent = record.name || record.route || ('Record #' + record.id);
+      panel.appendChild(heading);
+      const form = document.createElement('form');
+      form.className = 'form-grid';
+      const controls = {};
+
+      definitions.forEach(def => {
+        let initial = record[def.key];
+        if (def.list) initial = parseStoredList(initial).join('\n');
+        const field = makeCMSField(def.label, initial, Boolean(def.multiline || def.list));
+        controls[def.key] = field.control;
+        field.wrapper.classList.add('form-group-full');
+        form.appendChild(field.wrapper);
+      });
+
+      const actions = document.createElement('div');
+      actions.className = 'form-group-full';
+      const button = document.createElement('button');
+      button.type = 'submit';
+      button.className = 'btn btn-secondary';
+      button.textContent = 'Save changes';
+      const status = document.createElement('span');
+      status.setAttribute('aria-live', 'polite');
+      status.style.marginLeft = '0.75rem';
+      status.style.fontSize = '0.8rem';
+      actions.append(button, status);
+      form.appendChild(actions);
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const payload = {};
+        definitions.forEach(def => {
+          const value = controls[def.key].value.trim();
+          payload[def.key] = def.list
+            ? value.split(/\r?\n/).map(item => item.trim()).filter(Boolean)
+            : value;
+        });
+        button.disabled = true;
+        status.textContent = 'Saving...';
+        try {
+          const response = await fetch(definitions.endpoint(record), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            throw new Error(result.error || 'Save failed. Check your permissions and input.');
+          }
+          status.textContent = 'Saved';
+          status.style.color = '#22C55E';
+          if (typeof definitions.afterSave === 'function') definitions.afterSave(record, payload);
+        } catch (error) {
+          status.textContent = error.message || 'Save failed';
+          status.style.color = '#F59E0B';
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      panel.appendChild(form);
+      container.appendChild(panel);
+    });
+  }
+
   async function loadCMS() {
     try {
-      const [cntRes, svcRes] = await Promise.all([
-        fetch('/api/content').then(r => r.json()),
-        fetch('/api/services').then(r => r.json())
+      const responses = await Promise.all([
+        fetch('/api/admin/cms'),
+        fetch('/api/admin/services'),
+        fetch('/api/admin/industries'),
+        fetch('/api/admin/seo')
       ]);
-
-      const hero = cntRes.content?.hero;
+      if (responses.some(response => !response.ok)) {
+        throw new Error('CMS data could not be loaded. Confirm the account has CMS, services, industries, and SEO editor permissions.');
+      }
+      const [cmsData, servicesData, industriesData, seoData] = await Promise.all(responses.map(response => response.json()));
+      const sections = cmsData.sections || [];
+      const hero = sections.find(section => section.section_key === 'hero');
       if (hero) {
+        cmsHeroData = hero.data || {};
         document.getElementById('cms-hero-title').value = hero.title || '';
         document.getElementById('cms-hero-subtitle').value = hero.subtitle || '';
       }
+      const behindBusiness = sections.find(section => section.section_key === 'behind_business');
+      const behindBusinessEditor = document.getElementById('cms-behind-business-json');
+      if (behindBusinessEditor) behindBusinessEditor.value = JSON.stringify(behindBusiness ? behindBusiness.data || {} : {}, null, 2);
 
-      const servicesList = document.getElementById('cms-services-list');
-      servicesList.innerHTML = '';
-      (svcRes.services || []).forEach(svc => {
-        const div = document.createElement('div');
-        div.style.padding = '1rem';
-        div.style.background = 'rgba(255,255,255,0.02)';
-        div.style.border = '1px solid var(--admin-border)';
-        div.style.borderRadius = '6px';
-        div.style.marginBottom = '0.75rem';
-        div.style.display = 'flex';
-        div.style.justifyContent = 'space-between';
-        div.style.alignItems = 'center';
+      const serviceDefinitions = [
+        { key: 'name', label: 'Service name' },
+        { key: 'tagline', label: 'Tagline' },
+        { key: 'description', label: 'Description', multiline: true },
+        { key: 'deliverables', label: 'Deliverables (one per line)', list: true },
+        { key: 'team_roles', label: 'Team roles (one per line)', list: true },
+        { key: 'typical_sla', label: 'Typical service coverage / SLA' }
+      ];
+      serviceDefinitions.endpoint = record => '/api/admin/services/' + encodeURIComponent(record.id);
+      renderRecordEditors(document.getElementById('cms-services-list'), servicesData.services || [], serviceDefinitions);
 
-        div.innerHTML = `
-          <div>
-            <span style="font-size:0.7rem; color:var(--admin-accent); font-weight:700;">${escapeHTML(svc.category)}</span>
-            <div style="font-weight:600; color:#FFF; font-size:0.95rem;">${escapeHTML(svc.name)}</div>
-            <div style="font-size:0.78rem; color:var(--admin-text-sub);">${escapeHTML(svc.tagline)}</div>
-          </div>
-          <span style="font-size:0.75rem; color:var(--admin-text-muted);">${escapeHTML(svc.typical_sla)}</span>
-        `;
-        servicesList.appendChild(div);
-      });
-    } catch (e) {
-      console.error('Failed to load CMS', e);
+      const industryDefinitions = [
+        { key: 'headline', label: 'Headline' },
+        { key: 'subheadline', label: 'Subheadline', multiline: true },
+        { key: 'off_their_plate', label: 'Workflows we can take on (one per line)', list: true },
+        { key: 'case_snapshot', label: 'Industry snapshot', multiline: true }
+      ];
+      industryDefinitions.endpoint = record => '/api/admin/industries/' + encodeURIComponent(record.id);
+      renderRecordEditors(document.getElementById('cms-industries-list'), industriesData.industries || [], industryDefinitions);
+
+      const seoDefinitions = [
+        { key: 'meta_title', label: 'Meta title' },
+        { key: 'meta_description', label: 'Meta description', multiline: true },
+        { key: 'og_image', label: 'Open Graph image URL' },
+        { key: 'canonical_url', label: 'Canonical URL' },
+        { key: 'keywords', label: 'Keywords (comma separated)' }
+      ];
+      seoDefinitions.endpoint = record => '/api/admin/seo/' + encodeURIComponent(record.id);
+      renderRecordEditors(document.getElementById('seo-metadata-list'), seoData.seoList || [], seoDefinitions);
+    } catch (error) {
+      console.error('Failed to load CMS', error);
+      const message = document.getElementById('cms-load-status');
+      if (message) message.textContent = error.message || 'Failed to load CMS content.';
     }
   }
+
+  document.getElementById('cms-behind-business-form')?.addEventListener('submit', async event => {
+    event.preventDefault();
+    const status = document.getElementById('cms-behind-business-status');
+    const editor = document.getElementById('cms-behind-business-json');
+    let data;
+    try {
+      data = JSON.parse(editor.value);
+      if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('The content must be a JSON object.');
+    } catch (error) {
+      status.textContent = error.message || 'Invalid JSON.';
+      status.style.color = '#F59E0B';
+      return;
+    }
+    try {
+      const response = await fetch('/api/admin/cms/behind_business', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'THE PEOPLE BEHIND BUSINESS.', subtitle: 'Different businesses. Different needs. One reliable partner.', data })
+      });
+      if (!response.ok) throw new Error('Could not save Behind the Business content.');
+      status.textContent = 'Saved';
+      status.style.color = '#22C55E';
+    } catch (error) {
+      status.textContent = error.message;
+      status.style.color = '#F59E0B';
+    }
+  });
 
   document.getElementById('cms-hero-form').addEventListener('submit', async (e) => {
     e.preventDefault();
