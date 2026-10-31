@@ -92,7 +92,11 @@ const server=http.createServer(async(req,res)=>{
       rows.forEach(s=>settings[s.key]=s.value);
       delete settings.turnstile_secret_key;
       const hasSiteKey=Boolean(settings.turnstile_site_key&&settings.turnstile_site_key!=='1x00000000000000000000AA');
-      const turnstileReady=hasSiteKey&&Boolean(process.env.TURNSTILE_SECRET_KEY)&&process.env.CSP_ALLOW_CLOUDFLARE==='true';
+      const hasSecret=Boolean(process.env.TURNSTILE_SECRET_KEY);
+      const actionConfigured=process.env.TURNSTILE_EXPECTED_ACTION==='contact';
+      const hostnameConfigured=process.env.TURNSTILE_EXPECTED_HOSTNAME==='assistacorp.com';
+      const cspConfigured=process.env.CSP_ALLOW_CLOUDFLARE==='true';
+      const turnstileReady=hasSiteKey&&hasSecret&&actionConfigured&&hostnameConfigured&&cspConfigured;
       if(!turnstileReady)delete settings.turnstile_site_key;
       return sendJSON(res,{settings,turnstile_ready:turnstileReady});
     }
@@ -155,8 +159,17 @@ const server=http.createServer(async(req,res)=>{
         settings.forEach(s=>{if(!/(secret|token|password|private|credential)/i.test(s.key))map[s.key]=s.value;});
         const siteKeyConfigured=Boolean(map.turnstile_site_key&&map.turnstile_site_key!=='1x00000000000000000000AA');
         const secretConfigured=Boolean(process.env.TURNSTILE_SECRET_KEY);
+        const actionConfigured=process.env.TURNSTILE_EXPECTED_ACTION==='contact';
+        const hostnameConfigured=process.env.TURNSTILE_EXPECTED_HOSTNAME==='assistacorp.com';
         const cspConfigured=process.env.CSP_ALLOW_CLOUDFLARE==='true';
-        return sendJSON(res,{settings:map,security:{turnstile_site_key_configured:siteKeyConfigured,turnstile_secret_configured:secretConfigured,cloudflare_csp_enabled:cspConfigured,turnstile_ready:siteKeyConfigured&&secretConfigured&&cspConfigured}});
+        return sendJSON(res,{settings:map,security:{
+          turnstile_site_key_configured:siteKeyConfigured,
+          turnstile_secret_configured:secretConfigured,
+          turnstile_action_configured:actionConfigured,
+          turnstile_hostname_configured:hostnameConfigured,
+          cloudflare_csp_enabled:cspConfigured,
+          turnstile_ready:siteKeyConfigured&&secretConfigured&&actionConfigured&&hostnameConfigured&&cspConfigured
+        }});
       }
       if(method==='PUT'&&pathname==='/api/admin/settings'){
         if(!requirePermissionOr403(res,user,PERMISSIONS.EDIT_SETTINGS))return;
