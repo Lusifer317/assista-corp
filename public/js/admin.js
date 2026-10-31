@@ -3,6 +3,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+
   let currentUser = null;
   let currentActiveLeadId = null;
 
@@ -116,13 +118,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dwellMins = (s.dwell_seconds / 60).toFixed(1);
 
         tr.innerHTML = `
-          <td><strong>${s.display_id}</strong></td>
-          <td><span class="path-badge">${s.current_page}</span></td>
-          <td>${s.region}</td>
-          <td>${s.device_category} (${s.browser})</td>
+          <td><strong>${escapeHTML(s.display_id)}</strong></td>
+          <td><span class="path-badge">${escapeHTML(s.current_page)}</span></td>
+          <td>${escapeHTML(s.region)}</td>
+          <td>${escapeHTML(s.device_category)} (${escapeHTML(s.browser)})</td>
           <td>${dwellMins} min</td>
           <td>${s.event_count}</td>
-          <td><span style="color:var(--admin-accent); font-weight:600;">${s.last_event || 'page_view'}</span> ${lastDataStr ? `• ${lastDataStr}` : ''}</td>
+          <td><span style="color:var(--admin-accent); font-weight:600;">${escapeHTML(s.last_event || 'page_view')}</span> ${lastDataStr ? `• ${escapeHTML(lastDataStr)}` : ''}</td>
           <td>${s.is_converted_lead ? '<span style="color:#22C55E; font-weight:700;">★ Converted Lead</span>' : '<span style="color:#9E9EA8;">Anonymous</span>'}</td>
         `;
         tbody.appendChild(tr);
@@ -176,17 +178,17 @@ document.addEventListener('DOMContentLoaded', async () => {
           disciplines = lead.team_configuration?.disciplines || lead.requirements || [];
         } catch (e) {}
 
-        const tagsHtml = disciplines.slice(0, 3).map(d => `<span class="lead-mini-tag">${d}</span>`).join('');
+        const tagsHtml = disciplines.slice(0, 3).map(d => `<span class="lead-mini-tag">${escapeHTML(d)}</span>`).join('');
 
         card.innerHTML = `
           <div class="lead-card-header">
             <span class="lead-score-pill" style="background:${lead.tier?.color || '#C86A4B'}; color:#FFF;">
-              ${lead.tier?.tier || 'Lead'} • ${lead.intent_score} pts
+              ${escapeHTML(lead.tier?.tier || 'Lead')} • ${lead.intent_score} pts
             </span>
             <span style="font-size:0.7rem; color:var(--admin-text-muted);">#${lead.id}</span>
           </div>
-          <div class="lead-company-title">${lead.company}</div>
-          <div class="lead-name-sub">${lead.name} (${lead.industry})</div>
+          <div class="lead-company-title">${escapeHTML(lead.company)}</div>
+          <div class="lead-name-sub">${escapeHTML(lead.name)} (${escapeHTML(lead.industry)})</div>
           <div class="lead-disciplines-tags">${tagsHtml}</div>
         `;
 
@@ -216,7 +218,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const attribution = data.attribution;
 
       document.getElementById('dossier-company').textContent = lead.company;
-      document.getElementById('dossier-contact').textContent = `${lead.name} • ${lead.business_email}`;
+      document.getElementById('dossier-contact').textContent = `${escapeHTML(lead.name)} • ${escapeHTML(lead.business_email)}`;
       document.getElementById('dossier-tier').textContent = `${lead.tier.tier} (${lead.intent_score} Intent Score)`;
       document.getElementById('dossier-tier').style.background = lead.tier.color;
       document.getElementById('dossier-status-select').value = lead.status;
@@ -225,12 +227,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       const config = lead.team_configuration || {};
       const disciplinesText = (config.disciplines || []).join(', ') || 'General Business Support';
       document.getElementById('dossier-squad-details').innerHTML = `
-        <div><strong>Disciplines Requested:</strong> ${disciplinesText}</div>
-        <div><strong>Estimated Coverage:</strong> ${config.coverage || 'Dedicated Squad'} (${config.estimatedHours || '35 hrs'}/week)</div>
+        <div><strong>Disciplines Requested:</strong> ${escapeHTML(disciplinesText)}</div>
+        <div><strong>Estimated Coverage:</strong> ${escapeHTML(config.coverage || 'Dedicated Squad')} (${escapeHTML(config.estimatedHours || '35 hrs')}/week)</div>
       `;
       document.getElementById('dossier-message-box').innerHTML = `
         <strong>Message from Prospect:</strong><br>
-        ${lead.message ? `<em>“${lead.message}”</em>` : '<span style="color:#646470;">No additional message submitted.</span>'}
+        ${lead.message ? `<em>“${escapeHTML(lead.message)}”</em>` : '<span style="color:#646470;">No additional message submitted.</span>'}
       `;
 
       // Attribution Timeline
@@ -250,7 +252,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <span style="font-family:monospace; color:var(--admin-text-muted); font-size:0.75rem;">${timeFormatted}</span>
             <div>
               <strong style="color:#FFF;">${ev.type.replace(/_/g, ' ').toUpperCase()}</strong>: 
-              <span style="color:#D2D0C8;">${detail}</span>
+              <span style="color:#D2D0C8;">${escapeHTML(detail)}</span>
             </div>
           `;
           timelineFeed.appendChild(item);
@@ -279,10 +281,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.style.fontSize = '0.82rem';
       div.innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
-          <strong style="color:var(--admin-accent);">${n.author}</strong>
+          <strong style="color:var(--admin-accent);">${escapeHTML(n.author)}</strong>
           <span style="font-size:0.7rem; color:var(--admin-text-muted);">${new Date(n.date).toLocaleString()}</span>
         </div>
-        <div style="color:#F4F3EF;">${n.note}</div>
+        <div style="color:#F4F3EF;">${escapeHTML(n.note)}</div>
       `;
       list.appendChild(div);
     });
@@ -382,7 +384,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.style.background = 'rgba(255,255,255,0.02)';
         row.style.borderRadius = '4px';
         row.style.fontSize = '0.85rem';
-        row.innerHTML = `<span>${item.industry}</span> <strong>${item.count} views</strong>`;
+        row.innerHTML = `<span>${escapeHTML(item.industry)}</span> <strong>${item.count} views</strong>`;
         indContainer.appendChild(row);
       });
 
@@ -396,7 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.style.background = 'rgba(255,255,255,0.02)';
         row.style.borderRadius = '4px';
         row.style.fontSize = '0.85rem';
-        row.innerHTML = `<span>${item.category}</span> <strong>${item.count} views</strong>`;
+        row.innerHTML = `<span>${escapeHTML(item.category)}</span> <strong>${item.count} views</strong>`;
         capContainer.appendChild(row);
       });
     } catch (e) {
@@ -435,11 +437,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         div.innerHTML = `
           <div>
-            <span style="font-size:0.7rem; color:var(--admin-accent); font-weight:700;">${svc.category}</span>
-            <div style="font-weight:600; color:#FFF; font-size:0.95rem;">${svc.name}</div>
-            <div style="font-size:0.78rem; color:var(--admin-text-sub);">${svc.tagline}</div>
+            <span style="font-size:0.7rem; color:var(--admin-accent); font-weight:700;">${escapeHTML(svc.category)}</span>
+            <div style="font-weight:600; color:#FFF; font-size:0.95rem;">${escapeHTML(svc.name)}</div>
+            <div style="font-size:0.78rem; color:var(--admin-text-sub);">${escapeHTML(svc.tagline)}</div>
           </div>
-          <span style="font-size:0.75rem; color:var(--admin-text-muted);">${svc.typical_sla}</span>
+          <span style="font-size:0.75rem; color:var(--admin-text-muted);">${escapeHTML(svc.typical_sla)}</span>
         `;
         servicesList.appendChild(div);
       });
@@ -540,11 +542,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeFormatted = new Date(log.created_at).toLocaleString();
         tr.innerHTML = `
           <td>${timeFormatted}</td>
-          <td>${log.user_email || 'System'}</td>
-          <td><span style="font-weight:700; color:var(--admin-accent);">${log.action}</span></td>
-          <td>${log.entity_type} #${log.entity_id || '-'}</td>
-          <td>${log.ip_address}</td>
-          <td style="font-family:monospace; font-size:0.75rem; color:#A0A0AA;">${log.details ? log.details.slice(0, 50) : '-'}</td>
+          <td>${escapeHTML(log.user_email || 'System')}</td>
+          <td><span style="font-weight:700; color:var(--admin-accent);">${escapeHTML(log.action)}</span></td>
+          <td>${escapeHTML(log.entity_type)} #${escapeHTML(log.entity_id || '-')}</td>
+          <td>${escapeHTML(log.ip_address)}</td>
+          <td style="font-family:monospace; font-size:0.75rem; color:#A0A0AA;">${escapeHTML(log.details ? log.details.slice(0, 50) : '-')}</td>
         `;
         tbody.appendChild(tr);
       });
