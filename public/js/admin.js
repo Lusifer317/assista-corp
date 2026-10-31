@@ -36,6 +36,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
+  // 3. Tab Switching (bind before asynchronous authentication)
+  const navItems = document.querySelectorAll('.admin-nav-item');
+  const tabViews = document.querySelectorAll('.admin-tab-view');
+  const tabTitle = document.getElementById('tab-title');
+  const tabSubtitle = document.getElementById('tab-subtitle');
+  const TAB_META = {
+    live: { title: 'Live Visitor Activity', subtitle: 'Real-time opted-in first-party visitor sessions and touchpoint telemetry' },
+    crm: { title: 'CRM Pipeline & Lead Intelligence', subtitle: 'Track prospective partnerships from anonymous exploration to dedicated squad deployment' },
+    analytics: { title: 'Visitor Intelligence & Analytics', subtitle: 'Aggregate insight into high-intent actions, top capabilities, and industry demand' },
+    cms: { title: 'CMS Content Studio', subtitle: 'Modify brand narrative, hero manifesto, and capability universe specifications' },
+    seo: { title: 'SEO Metadata & Corporate Settings', subtitle: 'Manage page titles, search descriptions, canonical URLs, and corporate settings' },
+    audit: { title: 'Security & Audit Logs', subtitle: 'Tamper-evident logs of administrative actions, authentication, and data changes' }
+  };
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const tabId = item.dataset.tab;
+      navItems.forEach(i => {
+        i.classList.remove('active');
+        i.removeAttribute('aria-current');
+      });
+      tabViews.forEach(v => v.classList.remove('active'));
+
+      item.classList.add('active');
+      item.setAttribute('aria-current', 'page');
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.add('active');
+
+      if (TAB_META[tabId]) {
+        tabTitle.textContent = TAB_META[tabId].title;
+        tabSubtitle.textContent = TAB_META[tabId].subtitle;
+      }
+
+      // Trigger data loads
+      if (tabId === 'live') loadLiveActivity();
+      if (tabId === 'crm') loadCRMLeads();
+      if (tabId === 'analytics') loadAnalytics();
+      if (tabId === 'cms') loadCMS();
+      if (tabId === 'seo') { if (currentUser?.role === 'admin') loadSettings(); loadCMS(); }
+      if (tabId === 'audit') loadAuditLogs();
+    });
+  });
+
   // 1. Authenticate & initialize user
   try {
     const meRes = await fetch('/api/auth/me');
@@ -207,11 +250,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 3. Tab Switching
-  const navItems = document.querySelectorAll('.admin-nav-item');
-  const tabViews = document.querySelectorAll('.admin-tab-view');
-  const tabTitle = document.getElementById('tab-title');
-  const tabSubtitle = document.getElementById('tab-subtitle');
   if (currentUser.role === 'sales') {
     navItems.forEach(item => {
       if (['cms', 'seo', 'audit'].includes(item.dataset.tab)) item.hidden = true;
@@ -222,43 +260,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     settingsForm?.closest('.cms-editor-panel')?.setAttribute('hidden', '');
   }
 
-  const TAB_META = {
-    live: { title: 'Live Visitor Activity', subtitle: 'Real-time opted-in first-party visitor sessions and touchpoint telemetry' },
-    crm: { title: 'CRM Pipeline & Lead Intelligence', subtitle: 'Track prospective partnerships from anonymous exploration to dedicated squad deployment' },
-    analytics: { title: 'Visitor Intelligence & Analytics', subtitle: 'Aggregate insight into high-intent actions, top capabilities, and industry demand' },
-    cms: { title: 'CMS Content Studio', subtitle: 'Modify brand narrative, hero manifesto, and capability universe specifications' },
-    seo: { title: 'SEO Metadata & Corporate Settings', subtitle: 'Manage page titles, search descriptions, canonical URLs, and corporate settings' },
-    audit: { title: 'Security & Audit Logs', subtitle: 'Tamper-evident logs of administrative actions, authentication, and data changes' }
-  };
-
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.dataset.tab;
-      navItems.forEach(i => {
-        i.classList.remove('active');
-        i.removeAttribute('aria-current');
-      });
-      tabViews.forEach(v => v.classList.remove('active'));
-
-      item.classList.add('active');
-      item.setAttribute('aria-current', 'page');
-      const target = document.getElementById(`tab-${tabId}`);
-      if (target) target.classList.add('active');
-
-      if (TAB_META[tabId]) {
-        tabTitle.textContent = TAB_META[tabId].title;
-        tabSubtitle.textContent = TAB_META[tabId].subtitle;
-      }
-
-      // Trigger data loads
-      if (tabId === 'live') loadLiveActivity();
-      if (tabId === 'crm') loadCRMLeads();
-      if (tabId === 'analytics') loadAnalytics();
-      if (tabId === 'cms') loadCMS();
-      if (tabId === 'seo') { if (currentUser.role === 'admin') loadSettings(); loadCMS(); }
-      if (tabId === 'audit') loadAuditLogs();
-    });
-  });
 
   // Manual Refresh
   document.getElementById('refresh-data-btn').addEventListener('click', () => {
