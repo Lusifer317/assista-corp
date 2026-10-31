@@ -596,6 +596,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         cmsHeroData = hero.data || {};
         document.getElementById('cms-hero-title').value = hero.title || '';
         document.getElementById('cms-hero-subtitle').value = hero.subtitle || '';
+        document.getElementById('cms-hero-eyebrow').value = cmsHeroData.eyebrow || '';
+        document.getElementById('cms-hero-primary-cta').value = cmsHeroData.cta_primary || '';
+        document.getElementById('cms-hero-secondary-cta').value = cmsHeroData.cta_secondary || '';
       }
       const behindBusiness = sections.find(section => section.section_key === 'behind_business');
       const behindBusinessEditor = document.getElementById('cms-behind-business-json');
@@ -679,9 +682,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           subtitle,
           data: {
             ...cmsHeroData,
-            eyebrow: cmsHeroData.eyebrow || 'Global Business Services',
-            cta_primary: cmsHeroData.cta_primary || 'Meet Assista →',
-            cta_secondary: cmsHeroData.cta_secondary || 'Explore What We Do'
+            eyebrow: document.getElementById('cms-hero-eyebrow').value.trim(),
+            cta_primary: document.getElementById('cms-hero-primary-cta').value.trim(),
+            cta_secondary: document.getElementById('cms-hero-secondary-cta').value.trim()
           }
         })
       });
