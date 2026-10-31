@@ -4,6 +4,8 @@ const { createCsrfToken, validateCsrf } = require('../lib/csrf');
 const { validateLeadInput, validateAdminNote } = require('../lib/validation');
 const { can, PERMISSIONS } = require('../lib/rbac');
 const { buildCsp } = require('../lib/csp');
+const { recordSession, recordEvent, updateConsent } = require('../lib/analytics');
+const { db } = require('../lib/db');
 
 function runSecurityTests() {
   const token = createCsrfToken();
@@ -29,6 +31,21 @@ function runSecurityTests() {
   assert.match(csp, /object-src 'none'/);
   assert.match(csp, /frame-ancestors 'self'/);
   assert.match(csp, /nonce-abc123/);
+
+  const pendingId = 'ses_pending_1234567890';
+  assert.equal(recordSession({ sessionId: pendingId, consentStatus: 'pending' }), null, 'pending consent must not create a session');
+  assert.equal(recordEvent({ sessionId: pendingId, eventType: 'page_view', eventData: { path: '/' } }), false, 'events cannot be recorded without a session');
+
+  const grantedId = 'ses_granted_1234567890';
+  assert.ok(recordSession({ sessionId: grantedId, consentStatus: 'granted', referrer: 'https://example.com/path?email=private@example.com' }));
+  assert.equal(recordEvent({ sessionId: grantedId, eventType: 'page_view', eventData: { path: '/contact?token=secret', title: 'Contact' } }), true);
+  const storedReferrer = db.prepare('SELECT referrer FROM visitor_sessions WHERE session_id=?').get(grantedId).referrer;
+  assert.equal(storedReferrer, 'https://example.com', 'referrer paths and query parameters must not be retained');
+  const storedPath = JSON.parse(db.prepare('SELECT path_history FROM visitor_sessions WHERE session_id=?').get(grantedId).path_history)[0];
+  assert.equal(storedPath, '/contact', 'page tracking must remove query strings and fragments');
+  assert.equal(recordEvent({ sessionId: grantedId, eventType: 'arbitrary_event', eventData: {} }), false, 'unknown event types must be rejected');
+  assert.equal(updateConsent(grantedId, 'rejected'), true);
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM visitor_sessions WHERE session_id=?').get(grantedId).count, 0, 'withdrawal must delete anonymous session');
 
   console.log('Security regression tests passed.');
 }
