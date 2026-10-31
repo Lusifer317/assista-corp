@@ -1,128 +1,130 @@
 # ASSISTA CORP — Production Deployment
 
-## Target architecture
+## Existing production architecture
+
+Keep the currently deployed Oracle Cloud Infrastructure (OCI) environment. This application update does not require a new AWS account, AWS instance, new VM, or replacement hosting platform.
 
 ```text
-Spaceship domain
-      |
-      v
-Cloudflare DNS / proxy / TLS / WAF
-      |
-Cloudflare Tunnel (no public origin port)
-      |
-AWS Lightsail Ubuntu
-      |
+Spaceship domain registration
+        |
+Cloudflare DNS / proxy / TLS / WAF (if already enabled)
+        |
+Existing Cloudflare Tunnel (if already enabled)
+        |
+Existing Oracle Cloud compute instance
+        |
 Docker Compose
   +-- assista-corp (Node 22 + SQLite)
-  +-- cloudflared
-      |
-Persistent Docker volume: assista-corp-data
+  +-- cloudflared (only if already part of the current deployment)
+        |
+Persistent SQLite data volume
 ```
 
-## Recommended cost profile
+The diagram describes the existing deployment pattern; verify the actual OCI instance, Docker Compose project, volume name, and Cloudflare route before operating it. Do not create duplicate infrastructure to match this diagram.
 
-Start with one Lightsail Linux instance. The $5 USD plan is 0.5 GB RAM / 2 vCPU / 20 GB SSD; the $7 plan is 1 GB RAM / 2 vCPU / 40 GB SSD. For the production site plus Docker and cloudflared, use the $7 plan if budget permits. AWS currently lists these as fixed-price Lightsail bundles and offers a one-month free trial for the $5 plan subject to its Free Tier terms.
+## 1. Preserve the existing OCI environment
 
-Cloudflare Tunnel can expose the application without opening inbound 80/443 on the Lightsail instance. Keep SSH restricted to your administrative IPs.
+- Keep the current OCI compute instance, VCN, subnet, route tables, network security groups/security lists, and attached storage.
+- Keep the existing Cloudflare Tunnel and DNS configuration if they are already serving the production hostname.
+- Do not expose the Node application port directly to the public Internet. Keep origin access private and allow only the current tunnel path.
+- Keep SSH restricted to approved administrator source addresses and use the existing OCI access method.
+- Confirm adequate free disk space before updating the container or running SQLite maintenance.
 
-## 1. AWS
+No instance-size, network, or cloud-resource change is required by the application changes in this branch.
 
-1. Create an Ubuntu 24.04 Lightsail instance.
-2. Choose the $7 / 1 GB bundle for the initial production deployment.
-3. Attach a static IPv4 address.
-4. Open SSH only for your administrative source IP. Do not expose port 3000.
-5. Install Docker Engine and Docker Compose plugin.
-6. Clone the repository to `/opt/assista-corp`.
-7. Copy `.env.production.example` to `.env.production` and populate secrets.
+## 2. Domain and edge configuration
 
-## 2. Cloudflare
+The domain is registered with Spaceship. If Cloudflare is already authoritative for DNS and terminates public TLS, preserve the current nameserver, DNS, WAF, and Tunnel configuration.
 
-1. Add `assistacorp.com` to Cloudflare and change the nameservers at Spaceship to the nameservers Cloudflare provides.
-2. Create a Cloudflare Tunnel.
-3. Create a public hostname for `assistacorp.com` and point it to `http://assista:3000` from the Docker network.
-4. Add `www.assistacorp.com` only if the website needs it; redirect it to the canonical hostname.
-5. Enable proxying and HTTPS.
-6. Keep the origin inaccessible from the public Internet except SSH from your admin IPs.
-7. Enable the Cloudflare WAF managed rules available on the selected plan.
+Before changing DNS or Tunnel routes, export or record the working configuration. Do not change nameservers or create a second Tunnel as part of this application update.
 
-Cloudflare should terminate public TLS and the tunnel should carry traffic to the origin. If you later use a directly exposed HTTPS origin, use Full (strict) rather than Flexible.
+The origin should remain inaccessible from the public Internet except through the approved access path. If a directly exposed HTTPS origin is intentionally used, configure TLS correctly and do not use Flexible TLS.
 
 ## 3. Microsoft 365 / Outlook lead notifications
 
-The application now supports Microsoft Graph app-only mail delivery.
+The application currently contains Microsoft Graph app-only mail delivery support. This integration is intentionally outside the scope of the current application work; do not change its application registration, permissions, credentials, sender mailbox, recipient mailbox, or mail-flow configuration as part of this update.
 
-Create an Entra ID app registration and grant only `Mail.Send` application permission, then grant admin consent. Configure:
+Existing configuration variables (where already used) remain in the deployment environment:
 
 ```env
 MS_GRAPH_TENANT_ID=...
 MS_GRAPH_CLIENT_ID=...
 MS_GRAPH_CLIENT_SECRET=...
-MS_GRAPH_SENDER=hr@assistacorp.com
-MS_GRAPH_RECIPIENT=sales@assistacorp.com
+MS_GRAPH_SENDER=...
+MS_GRAPH_RECIPIENT=...
 ```
 
-The sender mailbox must exist in Microsoft 365. The application uses OAuth client credentials and Microsoft Graph; it does not store an Outlook password.
+Do not copy real values into Git, issue comments, or deployment documentation.
 
-## 4. Start production
+## 4. Deploy through the existing Compose project
+
+Perform deployment only after the pull request has been reviewed and merged and after confirming the production backup and rollback procedure.
+
+From the existing application directory on the OCI host:
 
 ```bash
-cd /opt/assista-corp
-cp .env.production.example .env.production
-chmod 600 .env.production
-
-# Populate the real values, then:
+docker compose -f docker-compose.prod.yml ps
+docker compose -f docker-compose.prod.yml config
 docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
-
 docker compose -f docker-compose.prod.yml ps
 docker compose -f docker-compose.prod.yml logs --tail=100 assista
 ```
 
-## 5. First admin setup
+Use the current production environment file and Docker volume. Do not replace the production database with the repository's development database, and do not run seed commands against production.
 
-Do not expose the admin page publicly until the initial admin account and MFA have been verified.
+## 5. Database backups
 
-Verify:
+The SQLite database is persisted in the Docker volume configured by the production Compose file.
 
-- admin login works
-- MFA enrollment works
-- editor/sales RBAC behaves correctly
-- `/api/admin/*` is denied without the required permission
-- session cookies have `Secure` and `HttpOnly` in production
-- Turnstile secret and expected hostname are configured
-
-## 6. Backups
-
-The SQLite database lives in the `assista-corp-data` Docker volume.
-
-Create a local backup:
+Before an application update or any database maintenance:
 
 ```bash
 sudo mkdir -p /opt/assista/backups
 sudo BACKUP_DIR=/opt/assista/backups /opt/assista-corp/scripts/backup-data.sh
 ```
 
-Run it daily from cron/systemd. Keep at least 14 days locally. For business-critical lead data, also copy encrypted backups to a separate storage location such as S3 and test restoration monthly.
+Verify that the backup file exists, has a non-zero size, and can be opened/restored in a separate test location. Keep at least 14 days of encrypted backups on a separate storage target where available. Do not assume a backup succeeded just because the script returned.
 
-## 7. Go-live verification
+## 6. One-time legacy analytics privacy reset
 
-```text
-[ ] assistacorp.com resolves through Cloudflare
-[ ] Cloudflare Tunnel is healthy
-[ ] Origin has no public 3000 listener
-[ ] SSH is restricted
-[ ] NODE_ENV=production
-[ ] TURNSTILE_SECRET_KEY configured
-[ ] TURNSTILE_EXPECTED_HOSTNAME=assistacorp.com
-[ ] Microsoft Graph Mail.Send configured and tested
-[ ] Admin MFA enabled
-[ ] Production .env is not in Git
-[ ] SQLite backup completed
-[ ] Backup restore tested
-[ ] GitHub Security Audit is green
-[ ] Public lead form tested
-[ ] Admin RBAC tested
-[ ] CSP/security headers verified
-[ ] Cloudflare WAF enabled
-[ ] Error logs reviewed
+The previous visitor tracker recorded anonymous page events before the visitor chose whether to allow analytics. The new tracker does not start until explicit opt-in, and a visitor can reopen Privacy Settings and withdraw consent later.
+
+Because the old database did not record the time of consent, old events cannot be reliably separated into pre-consent and post-consent activity. Before re-enabling analytics on the upgraded production version, run the reset utility after taking and verifying a database backup.
+
+First run the dry-run report:
+
+```bash
+node scripts/reset-legacy-analytics.js
 ```
+
+Review the counts. The utility is non-destructive unless explicitly invoked with `--apply`. With approval to clear historical anonymous telemetry, run:
+
+```bash
+node scripts/reset-legacy-analytics.js --apply
+```
+
+This removes legacy visitor sessions and analytics events and clears their session links from lead records. It **does not delete leads, lead messages, CRM statuses, or internal notes**. New visitor analytics will start from consented sessions after deployment. Keep the verified pre-reset backup according to the company's retention policy.
+
+## 7. Post-deployment verification
+
+- Confirm the public site and all primary routes load through the existing hostname.
+- Confirm the analytics consent banner is shown to a visitor with no saved choice.
+- Confirm no session or event is created before acceptance.
+- Accept analytics, navigate service and industry pages, and verify only consented events appear in the admin dashboard.
+- Reopen Privacy Settings, choose Essential Only, and verify the corresponding session/events are deleted and no further tracking is recorded.
+- Submit a test enquiry and confirm it is stored even when analytics consent is declined; it must not be behaviorally attributed to a visitor session.
+- Verify CMS edits to homepage, Behind the Business content, services, industries, and SEO metadata are reflected on the public site.
+- Verify editor/admin/sales role permissions in the admin console.
+- Confirm lead search, stage filtering, Lost stage, lead notes, CSV export, and the audit trail.
+- Confirm the existing mail notification flow has not been changed as part of this release; test it separately under its existing operational procedure.
+- Review application logs, OCI resource metrics, free disk space, and backup status.
+
+## 8. Rollback
+
+If the new application version fails validation:
+
+1. Revert to the last known-good application image or commit using the current Compose deployment process.
+2. Do not restore an older database over a newer database unless the rollback procedure explicitly requires it and the data-loss implications are understood.
+3. If the legacy analytics reset was run, restore its pre-reset backup only if there is an approved reason to restore that historical telemetry; otherwise leave the privacy reset in place.
+4. Verify public access, lead submission, admin authentication, and database integrity before declaring rollback complete.

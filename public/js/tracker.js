@@ -1,112 +1,139 @@
 /**
- * ASSISTA CORP — Privacy-Conscious First-Party Intelligence
- * No third-party pixels. No invasive fingerprinting. Zero PII collected anonymously.
+ * ASSISTA CORP — Consent-gated first-party analytics.
+ * No analytics identifier or telemetry is created before explicit opt-in.
  */
-
 (function () {
   const SESSION_KEY = 'assista_session_id';
   const CONSENT_KEY = 'assista_consent_choice';
+  const REVOKE_KEY = 'assista_pending_revocation';
 
-  function getOrGenerateSessionId() {
-    let sid = localStorage.getItem(SESSION_KEY);
-    if (!sid) {
-      sid = 'ses_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
-      localStorage.setItem(SESSION_KEY, sid);
-    }
-    return sid;
+  function storageGet(key) {
+    try { return localStorage.getItem(key); } catch { return null; }
+  }
+  function storageSet(key, value) {
+    try { localStorage.setItem(key, value); } catch {}
+  }
+  function storageRemove(key) {
+    try { localStorage.removeItem(key); } catch {}
   }
 
-  const sessionId = getOrGenerateSessionId();
-  let consentStatus = localStorage.getItem(CONSENT_KEY) || 'pending';
+  let consentStatus = storageGet(CONSENT_KEY) || 'pending';
+  if (!['pending', 'granted', 'rejected'].includes(consentStatus)) consentStatus = 'pending';
+  let sessionId = consentStatus === 'granted' ? storageGet(SESSION_KEY) : null;
+  let initialized = false;
+  let hashListenerInstalled = false;
+  let dwellTimersScheduled = false;
+
+  function createSessionId() {
+    const bytes = new Uint8Array(24);
+    window.crypto.getRandomValues(bytes);
+    return 'ses_' + Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   function getRegionFromTimezone() {
     try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (!tz) return 'Global';
-      const parts = tz.split('/');
-      return parts.length > 1 ? `${parts[1].replace(/_/g, ' ')}, ${parts[0]}` : tz;
-    } catch (e) {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (!timezone) return 'Global';
+      const parts = timezone.split('/');
+      return parts.length > 1 ? parts[1].replace(/_/g, ' ') + ', ' + parts[0] : timezone;
+    } catch {
       return 'Global';
     }
   }
 
   async function postJSON(endpoint, data) {
     try {
-      await fetch(endpoint, {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
         keepalive: true
       });
-    } catch (err) {
-      // Non-blocking telemetry
+      return response.ok;
+    } catch {
+      return false;
     }
   }
 
-  function initSession() {
-    postJSON('/api/analytics/session', {
-      sessionId,
+  async function revokeSession(id) {
+    if (!id) return;
+    storageSet(REVOKE_KEY, id);
+    const removed = await postJSON('/api/analytics/consent', { sessionId: id, consentStatus: 'rejected' });
+    if (removed && storageGet(REVOKE_KEY) === id) storageRemove(REVOKE_KEY);
+  }
+
+  function recordEvent(eventType, eventData) {
+    if (consentStatus !== 'granted' || !sessionId) return;
+    postJSON('/api/analytics/track', { sessionId, eventType, eventData: eventData || {} });
+  }
+
+  async function initializeSession() {
+    if (initialized || consentStatus !== 'granted') return;
+    if (!sessionId) {
+      sessionId = createSessionId();
+      storageSet(SESSION_KEY, sessionId);
+    }
+    initialized = true;
+    const initializingSessionId = sessionId;
+    const created = await postJSON('/api/analytics/session', {
+      sessionId: initializingSessionId,
       referrer: document.referrer || 'Direct / Bookmark',
       region: getRegionFromTimezone(),
-      consentStatus
+      consentStatus: 'granted'
     });
-
-    // Record initial pageview
-    recordEvent('page_view', {
-      path: window.location.pathname + window.location.hash,
-      title: document.title
-    });
-  }
-
-  function recordEvent(eventType, eventData = {}) {
-    // If user explicitly rejected analytics, only record strictly necessary form submissions
-    if (consentStatus === 'rejected' && eventType !== 'form_submitted') {
+    if (!created) {
+      initialized = false;
       return;
     }
-
-    postJSON('/api/analytics/track', {
-      sessionId,
-      eventType,
-      eventData
-    });
+    // If consent was withdrawn while session creation was in flight, send a
+    // second deletion request so the late-arriving create cannot remain stored.
+    if (consentStatus !== 'granted' || sessionId !== initializingSessionId) {
+      await revokeSession(initializingSessionId);
+      initialized = false;
+      return;
+    }
+    recordEvent('page_view', { path: window.location.pathname, title: document.title });
+    if (!hashListenerInstalled) {
+      window.addEventListener('hashchange', () => {
+        recordEvent('page_view', { path: window.location.pathname, title: document.title });
+      });
+      hashListenerInstalled = true;
+    }
+    if (!dwellTimersScheduled) {
+      [30, 60, 180, 300].forEach(seconds => {
+        window.setTimeout(() => recordEvent('dwell_milestone', { duration: seconds }), seconds * 1000);
+      });
+      dwellTimersScheduled = true;
+    }
   }
 
   function setConsent(status) {
+    if (!['granted', 'rejected'].includes(status)) return;
+    const previousSession = sessionId;
     consentStatus = status;
-    localStorage.setItem(CONSENT_KEY, status);
-    postJSON('/api/analytics/consent', {
-      sessionId,
-      consentStatus: status
-    });
+    storageSet(CONSENT_KEY, status);
+    if (status === 'granted') {
+      initializeSession();
+      return;
+    }
+    if (previousSession) revokeSession(previousSession);
+    sessionId = null;
+    initialized = false;
+    storageRemove(SESSION_KEY);
   }
 
-  // Track hash changes (e.g. #capabilities, #industries, #team-builder)
-  window.addEventListener('hashchange', () => {
-    recordEvent('page_view', {
-      path: window.location.pathname + window.location.hash,
-      title: document.title
-    });
-  });
-
-  // Track dwell time milestones
-  [30, 60, 180, 300].forEach(seconds => {
-    setTimeout(() => {
-      recordEvent('dwell_milestone', { duration: seconds });
-    }, seconds * 1000);
-  });
-
-  // Expose to window for UI interactions
   window.AssistaAnalytics = {
-    sessionId,
     recordEvent,
     setConsent,
-    getConsent: () => consentStatus
+    getConsent: () => consentStatus,
+    getSessionId: () => consentStatus === 'granted' ? sessionId : null
   };
+  const pendingRevocation = storageGet(REVOKE_KEY);
+  if (pendingRevocation) revokeSession(pendingRevocation);
+  if (consentStatus !== 'granted') storageRemove(SESSION_KEY);
 
-  // Launch on DOM ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initSession);
-  } else {
-    initSession();
+  if (consentStatus === 'granted') {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeSession, { once: true });
+    else initializeSession();
   }
 })();
