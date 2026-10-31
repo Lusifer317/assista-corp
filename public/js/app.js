@@ -474,10 +474,14 @@ document.addEventListener('DOMContentLoaded', async () => {
           const data = await response.json().catch(() => ({}));
           if (!response.ok) throw new Error(data.error || 'Could not load form security configuration.');
           const key = String(data.settings?.turnstile_site_key || '').trim();
-          if (!key || key === '1x00000000000000000000AA') {
-            throw new Error('Online inquiries are temporarily unavailable. The site administrator must configure a live Cloudflare Turnstile site key.');
+          if (!data.turnstile_ready || !key || key === '1x00000000000000000000AA') {
+            throw new Error('Online inquiries are temporarily unavailable. The administrator must configure a live Cloudflare Turnstile site key, matching server secret, and CSP allowance.');
           }
           return key;
+        })
+        .catch(error => {
+          turnstileSiteKeyPromise = null;
+          throw error;
         });
     }
     return turnstileSiteKeyPromise;
@@ -507,6 +511,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (window.turnstile) {
           finish();
         }
+      }).catch(error => {
+        turnstileScriptPromise = null;
+        throw error;
       });
     }
     return turnstileScriptPromise;
@@ -626,23 +633,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         business_email: formData.get('email'),
         company: formData.get('company'),
         industry: formData.get('industry'),
-        requirements: ['Executive Support', 'Operations'],
-        team_configuration: {
-          disciplines: ['Dedicated Client Cell'],
-          estimatedHours: '40 hrs/wk',
-          coverage: 'Dedicated Squad'
-        },
+        // This form does not ask for a service scope or squad size. Keep those
+        // fields empty rather than inventing requirements or staffing estimates.
+        requirements: [],
+        team_configuration: {},
         message: formData.get('message'),
         session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
         turnstile_token: formData.get('turnstile_token') || ''
       };
-
-      if (!payload.turnstile_token) {
-        alert('Complete the security verification before submitting your inquiry.');
-        submitBtn.disabled = true;
-        submitBtn.textContent = originalText;
-        return;
-      }
 
       if (!payload.turnstile_token) {
         alert('Complete the security verification before submitting your inquiry.');
@@ -721,8 +719,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         message: formData.get('message'),
         session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
-        turnstile_token: formData.get('turnstile_token') || 'cf_turnstile_pass_token_demo'
+        turnstile_token: formData.get('turnstile_token') || ''
       };
+
+      if (!payload.turnstile_token) {
+        alert('Complete the security verification before submitting your inquiry.');
+        submitBtn.disabled = true;
+        submitBtn.textContent = originalText;
+        return;
+      }
 
       try {
         const response = await fetch('/api/leads/submit', {
@@ -730,7 +735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-        const resData = await response.json();
+        const resData = await response.json().catch(() => ({}));
         if (response.ok) {
           contactPageForm.style.display = 'none';
           if (contactPageSuccess) contactPageSuccess.style.display = 'block';
