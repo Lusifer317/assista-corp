@@ -4,6 +4,17 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+  // HTML escaping does not make values safe for inline CSS.
+  const safeTierColor = (value) => {
+    const allowed = new Set(['#C86A4B', '#22C55E', '#F59E0B', '#64748B', '#8B5CF6']);
+    return allowed.has(String(value || '')) ? value : '#C86A4B';
+  };
+  // Prevent spreadsheet formula execution from user-controlled lead fields.
+  const csvCell = (value) => {
+    let text = String(value ?? '');
+    if (/^[\\s\\u0000-\\u001f]*[=+@\\-]/.test(text)) text = "'" + text;
+    return '"' + text.replace(/"/g, '""') + '"';
+  };
 
   let currentUser = null;
   let currentActiveLeadId = null;
@@ -182,7 +193,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         card.innerHTML = `
           <div class="lead-card-header">
-            <span class="lead-score-pill" style="background:${lead.tier?.color || '#C86A4B'}; color:#FFF;">
+            <span class="lead-score-pill" style="background:${safeTierColor(lead.tier?.color)}; color:#FFF;">
               ${escapeHTML(lead.tier?.tier || 'Lead')} • ${lead.intent_score} pts
             </span>
             <span style="font-size:0.7rem; color:var(--admin-text-muted);">#${lead.id}</span>
@@ -340,14 +351,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const headers = ['ID', 'Name', 'Email', 'Company', 'Industry', 'Status', 'Intent Score', 'Created At'];
     const rows = leads.map(l => [
-      l.id,
-      `"${l.name.replace(/"/g, '""')}"`,
-      `"${l.business_email}"`,
-      `"${l.company.replace(/"/g, '""')}"`,
-      `"${l.industry}"`,
-      `"${l.status}"`,
-      l.intent_score,
-      `"${l.created_at}"`
+      csvCell(l.id), csvCell(l.name), csvCell(l.business_email), csvCell(l.company),
+      csvCell(l.industry), csvCell(l.status), csvCell(l.intent_score), csvCell(l.created_at)
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
