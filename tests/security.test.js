@@ -4,7 +4,7 @@ const { createCsrfToken, validateCsrf } = require('../lib/csrf');
 const { validateLeadInput, validateAdminNote } = require('../lib/validation');
 const { can, PERMISSIONS } = require('../lib/rbac');
 const { buildCsp } = require('../lib/csp');
-const { recordSession, recordEvent, updateConsent, sanitizeEventData } = require('../lib/analytics');
+const { recordSession, recordEvent, updateConsent, sanitizeEventData, getAnalyticsOverview } = require('../lib/analytics');
 const { db } = require('../lib/db');
 
 function runSecurityTests() {
@@ -52,8 +52,12 @@ function runSecurityTests() {
   const storedPath = JSON.parse(db.prepare('SELECT path_history FROM visitor_sessions WHERE session_id=?').get(grantedId).path_history)[0];
   assert.equal(storedPath, '/contact', 'page tracking must remove query strings and fragments');
   assert.equal(recordEvent({ sessionId: grantedId, eventType: 'arbitrary_event', eventData: {} }), false, 'unknown event types must be rejected');
+  const attributedBefore = getAnalyticsOverview().attributedSessions;
   const leadInsert = db.prepare('INSERT INTO leads (name, business_email, company, industry, session_id) VALUES (?, ?, ?, ?, ?)')
     .run('Privacy Test', 'privacy-test@example.com', 'Test Company', 'Other', grantedId);
+  db.prepare('INSERT INTO leads (name, business_email, company, industry, session_id) VALUES (?, ?, ?, ?, ?)')
+    .run('Privacy Test Two', 'privacy-test-two@example.com', 'Test Company Two', 'Other', grantedId);
+  assert.equal(getAnalyticsOverview().attributedSessions, attributedBefore + 1, 'conversion numerator counts distinct sessions, not lead rows');
   assert.equal(updateConsent(grantedId, 'rejected'), true);
   assert.equal(db.prepare('SELECT COUNT(*) AS count FROM visitor_sessions WHERE session_id=?').get(grantedId).count, 0, 'withdrawal must delete anonymous session');
   assert.equal(db.prepare('SELECT COUNT(*) AS count FROM analytics_events WHERE session_id=?').get(grantedId).count, 0, 'withdrawal must delete analytics events');
