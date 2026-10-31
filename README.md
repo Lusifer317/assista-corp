@@ -106,6 +106,47 @@ assista-corp/
 
 ---
 
+## Operations Admin Portal
+
+The authenticated portal is available at `/admin` after signing in at `/login`.
+
+| Area | Functionality |
+|---|---|
+| Live Activity | Current opted-in visitor sessions, page path, device/browser, dwell time, and recent touchpoints. |
+| CRM Pipeline | Real validated inquiries, lead dossier, stage updates, internal notes, filters, and CSV export. |
+| Visitor Intelligence | Consent-based session and event totals, 24-hour activity, conversion attribution, industry and service interest, device mix, and high-intent actions. |
+| CMS Studio | Edit the homepage hero and scenario content, services, and industry content. |
+| SEO & Settings | Edit SEO metadata and verified business contact values; configure the public Turnstile site key. |
+| Security & Audit | Review audit events and configure/verify TOTP MFA. |
+
+### Production lead-capture prerequisites
+
+Lead records are created only after a public form is submitted successfully and the Cloudflare Turnstile token passes server-side Siteverify validation. The public forms use an explicit Turnstile widget; demo/test tokens are not accepted in production.
+
+Configure all of the following before accepting production inquiries:
+
+1. Create a Cloudflare Turnstile widget for `assistacorp.com`.
+2. In **Admin → SEO & Settings**, save the widget's **public site key**.
+3. Set the matching **secret key** in `/opt/assista/.env.production` as `TURNSTILE_SECRET_KEY`. Do not put the secret in the database or share it in logs/chat.
+4. Keep these runtime settings aligned:
+   - `CSP_ALLOW_CLOUDFLARE=true`
+   - `TURNSTILE_EXPECTED_ACTION=contact`
+   - `TURNSTILE_EXPECTED_HOSTNAME=assistacorp.com`
+5. Recreate only the application service after changing environment values, and verify `/health` and the public contact forms. The Cloudflare Tunnel does not need to be recreated.
+
+The admin settings screen reports which Turnstile prerequisites are missing without disclosing the secret. When the prerequisites are incomplete, inquiry forms deliberately remain disabled rather than silently submitting demo tokens.
+
+### Understanding empty dashboards
+
+- Live sessions and Visitor Intelligence include only visitors who explicitly consent to analytics. Zero sessions/events can therefore be a correct result.
+- CRM Pipeline contains actual accepted inquiries. It does not create sample leads or synthetic visitor records.
+- CMS content and SEO records are read from the existing SQLite database. Empty-state messages indicate missing records rather than substituting fabricated content.
+- Lead attribution is available only when a lead is linked to a consented analytics session.
+
+**Production safety:** `npm run seed` / `node data/seed.js` is for a new local database only. The seed routine deletes and repopulates application tables, including users and content. Never run it against the production volume.
+
+---
+
 ## License
 
 UNLICENSED &bull; Proprietary to ASSISTA CORP.
