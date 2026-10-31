@@ -2,7 +2,7 @@
  * ASSISTA CORP — Admin Operations Center Controller
  */
 
-document.addEventListener('DOMContentLoaded', async () => {
+const initAdmin = async () => {
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   // HTML escaping does not make values safe for inline CSS.
   const safeTierColor = (value) => {
@@ -1022,4 +1022,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initial tab load
   loadLiveActivity();
-});
+};
+
+// Handle both normal and late script execution; initialize only once.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdmin, { once: true });
+} else {
+  initAdmin();
+}
