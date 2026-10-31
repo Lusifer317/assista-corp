@@ -214,7 +214,7 @@ body.admin-body {
 /* CRM Pipeline Kanban Board */
 .kanban-board {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, minmax(230px, 1fr));
   gap: 1rem;
   align-items: start;
   overflow-x: auto;
