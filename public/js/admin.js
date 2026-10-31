@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           item.innerHTML = `
             <span style="font-family:monospace; color:var(--admin-text-muted); font-size:0.75rem;">${timeFormatted}</span>
             <div>
-              <strong style="color:#FFF;">${ev.type.replace(/_/g, ' ').toUpperCase()}</strong>: 
+              <strong style="color:#FFF;">${escapeHTML(String(ev.type || 'event').replace(/_/g, ' ').toUpperCase())}</strong>: 
               <span style="color:#D2D0C8;">${escapeHTML(detail)}</span>
             </div>
           `;
@@ -380,6 +380,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('intel-24h-sessions').textContent = overview.sessions24h || 0;
       document.getElementById('intel-total-leads').textContent = overview.totalLeads || 0;
       document.getElementById('intel-conv-rate').textContent = `${overview.conversionRate || 0}%`;
+      const attributed = document.getElementById('intel-attributed-leads');
+      if (attributed) attributed.textContent = `Attributed leads: ${overview.attributedLeads || 0} (consented sessions only)`;
 
       const indContainer = document.getElementById('intel-top-industries');
       indContainer.innerHTML = '';
@@ -408,6 +410,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         row.innerHTML = `<span>${escapeHTML(item.category)}</span> <strong>${item.count} views</strong>`;
         capContainer.appendChild(row);
       });
+      const renderMetricRows = (containerId, rows, labelKey, suffix) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.replaceChildren();
+        (rows || []).forEach(item => {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.style.padding = '0.5rem 0.75rem';
+          row.style.background = 'rgba(255,255,255,0.02)';
+          row.style.borderRadius = '4px';
+          row.style.fontSize = '0.85rem';
+          const label = document.createElement('span');
+          label.textContent = String(item[labelKey] || 'Other');
+          const count = document.createElement('strong');
+          count.textContent = String(Number(item.count) || 0) + suffix;
+          row.append(label, count);
+          container.appendChild(row);
+        });
+        if (!container.childElementCount) {
+          const empty = document.createElement('p');
+          empty.textContent = 'No opted-in activity recorded yet.';
+          empty.style.color = 'var(--admin-text-muted)';
+          empty.style.fontSize = '0.8rem';
+          container.appendChild(empty);
+        }
+      };
+      renderMetricRows('intel-device-mix', overview.devices, 'device_category', ' sessions');
+      renderMetricRows('intel-high-intent', overview.highIntentActions, 'event_type', ' actions');
     } catch (e) {
       console.error('Failed to load analytics', e);
     }
