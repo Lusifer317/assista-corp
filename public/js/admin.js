@@ -276,10 +276,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   // -----------------------------------------------------------
   async function loadLiveActivity() {
     try {
-      const [liveRes, overviewRes] = await Promise.all([
-        fetch('/api/admin/analytics/live').then(r => r.json()),
-        fetch('/api/admin/analytics/overview').then(r => r.json())
+      const [liveResponse, overviewResponse] = await Promise.all([
+        fetch('/api/admin/analytics/live'),
+        fetch('/api/admin/analytics/overview')
       ]);
+      if (!liveResponse.ok || !overviewResponse.ok) {
+        throw new Error('Analytics API request failed. Check your session and analytics permissions.');
+      }
+      const [liveRes, overviewRes] = await Promise.all([liveResponse.json(), overviewResponse.json()]);
 
       const sessions = liveRes.liveSessions || [];
       const overview = overviewRes.overview || {};
@@ -592,7 +596,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function loadAnalytics() {
     try {
       const res = await fetch('/api/admin/analytics/overview');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to load visitor analytics.');
       const overview = data.overview || {};
 
       document.getElementById('intel-total-sessions').textContent = overview.totalSessions || 0;
@@ -923,6 +928,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (settings.phone) document.getElementById('set-phone').value = settings.phone;
       if (settings.headquarters) document.getElementById('set-hq').value = settings.headquarters;
       if (settings.turnstile_site_key) document.getElementById('set-turnstile-key').value = settings.turnstile_site_key;
+      if (!settings.turnstile_site_key || settings.turnstile_site_key === '1x00000000000000000000AA') {
+        showAdminStatus('Live lead capture is not configured: add a production Cloudflare Turnstile site key here and configure its matching secret in the server environment.', 'error');
+      }
     } catch (e) {
       console.error('Failed to load settings', e);
       showAdminStatus(e.message || 'Failed to load corporate settings.', 'error');
