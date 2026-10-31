@@ -97,6 +97,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (activeTab === 'crm') loadCRMLeads();
     if (activeTab === 'analytics') loadAnalytics();
     if (activeTab === 'audit') loadAuditLogs();
+    if (activeTab === 'cms') loadCMS();
+    if (activeTab === 'seo') { loadSettings(); }
   });
 
   // -----------------------------------------------------------
@@ -622,9 +624,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           title,
           subtitle,
           data: {
-            eyebrow: 'Global Business Services',
-            cta_primary: 'Meet Assista →',
-            cta_secondary: 'Explore What We Do'
+            ...cmsHeroData,
+            eyebrow: cmsHeroData.eyebrow || 'Global Business Services',
+            cta_primary: cmsHeroData.cta_primary || 'Meet Assista →',
+            cta_secondary: cmsHeroData.cta_secondary || 'Explore What We Do'
           }
         })
       });
