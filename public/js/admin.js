@@ -365,17 +365,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         ? lead.team_configuration.disciplines
         : Array.isArray(lead.requirements) ? lead.requirements : [];
       const tagsHtml = disciplines.slice(0, 3).map(item => '<span class="lead-mini-tag">' + escapeHTML(item) + '</span>').join('');
-      card.innerHTML = \`
+      card.innerHTML = `
         <div class="lead-card-header">
-          <span class="lead-score-pill" style="background:\${safeTierColor(lead.tier?.color)}; color:#FFF;">
-            \${escapeHTML(lead.tier?.tier || 'Lead')} • \${Number(lead.intent_score) || 0} pts
+          <span class="lead-score-pill" style="background:${safeTierColor(lead.tier?.color)}; color:#FFF;">
+            ${escapeHTML(lead.tier?.tier || 'Lead')} • ${Number(lead.intent_score) || 0} pts
           </span>
-          <span style="font-size:0.7rem; color:var(--admin-text-muted);">#\${escapeHTML(lead.id)}</span>
+          <span style="font-size:0.7rem; color:var(--admin-text-muted);">#${escapeHTML(lead.id)}</span>
         </div>
-        <div class="lead-company-title">\${escapeHTML(lead.company)}</div>
-        <div class="lead-name-sub">\${escapeHTML(lead.name)} (\${escapeHTML(lead.industry)})</div>
-        <div class="lead-disciplines-tags">\${tagsHtml}</div>
-      \`;
+        <div class="lead-company-title">${escapeHTML(lead.company)}</div>
+        <div class="lead-name-sub">${escapeHTML(lead.name)} (${escapeHTML(lead.industry)})</div>
+        <div class="lead-disciplines-tags">${tagsHtml}</div>
+      `;
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       card.setAttribute('aria-label', 'Open lead ' + String(lead.company || lead.name || lead.id));
