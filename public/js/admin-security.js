@@ -3,7 +3,7 @@
   const originalFetch = window.fetch.bind(window);
 
   function csrfToken() {
-    const match = document.cookie.match(/(?:^|;\\s*)assista_csrf=([^;]+)/);
+    const match = document.cookie.match(/(?:^|;\s*)assista_csrf=([^;]+)/);
     return match ? decodeURIComponent(match[1]) : '';
   }
 
@@ -23,12 +23,11 @@
   };
 
   // Sanitize dynamic HTML inserted by the legacy admin controller. Use the
-  // captured native setter/getter for the detached template to avoid calling
-  // this override recursively.
+  // captured native setter/getter for the detached template to avoid recursion.
   const nativeInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
   if (!nativeInnerHTML?.set || !nativeInnerHTML?.get) return;
 
-  const SAFE_URI_SCHEMES = /^(?:https?:|mailto:|tel:|\\/|#|data:image\\/(?:png|gif|jpe?g|webp);base64,)/i;
+  const SAFE_URI_SCHEMES = /^(?:https?:|mailto:|tel:|\/|#|data:image\/(?:png|gif|jpe?g|webp);base64,)/i;
   const BLOCKED_ELEMENTS = new Set(['script', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'style', 'template']);
 
   function sanitizeHtml(html) {
