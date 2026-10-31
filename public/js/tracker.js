@@ -5,6 +5,7 @@
 (function () {
   const SESSION_KEY = 'assista_session_id';
   const CONSENT_KEY = 'assista_consent_choice';
+  const REVOKE_KEY = 'assista_pending_revocation';
 
   function storageGet(key) {
     try { return localStorage.getItem(key); } catch { return null; }
@@ -54,6 +55,13 @@
     }
   }
 
+  async function revokeSession(id) {
+    if (!id) return;
+    storageSet(REVOKE_KEY, id);
+    const removed = await postJSON('/api/analytics/consent', { sessionId: id, consentStatus: 'rejected' });
+    if (removed && storageGet(REVOKE_KEY) === id) storageRemove(REVOKE_KEY);
+  }
+
   function recordEvent(eventType, eventData) {
     if (consentStatus !== 'granted' || !sessionId) return;
     postJSON('/api/analytics/track', { sessionId, eventType, eventData: eventData || {} });
@@ -80,7 +88,7 @@
     // If consent was withdrawn while session creation was in flight, send a
     // second deletion request so the late-arriving create cannot remain stored.
     if (consentStatus !== 'granted' || sessionId !== initializingSessionId) {
-      await postJSON('/api/analytics/consent', { sessionId: initializingSessionId, consentStatus: 'rejected' });
+      await revokeSession(initializingSessionId);
       initialized = false;
       return;
     }
@@ -108,7 +116,7 @@
       initializeSession();
       return;
     }
-    if (previousSession) postJSON('/api/analytics/consent', { sessionId: previousSession, consentStatus: 'rejected' });
+    if (previousSession) revokeSession(previousSession);
     sessionId = null;
     initialized = false;
     storageRemove(SESSION_KEY);
@@ -120,6 +128,9 @@
     getConsent: () => consentStatus,
     getSessionId: () => consentStatus === 'granted' ? sessionId : null
   };
+  const pendingRevocation = storageGet(REVOKE_KEY);
+  if (pendingRevocation) revokeSession(pendingRevocation);
+  if (consentStatus !== 'granted') storageRemove(SESSION_KEY);
 
   if (consentStatus === 'granted') {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initializeSession, { once: true });
