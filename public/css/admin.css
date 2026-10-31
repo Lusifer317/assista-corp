@@ -439,3 +439,18 @@ body.admin-body {
   color: #86EFAC;
   background: rgba(20, 83, 45, 0.16);
 }
+
+.admin-nav-item:focus-visible,
+.admin-main button:focus-visible,
+.admin-main a:focus-visible,
+.admin-main input:focus-visible,
+.admin-main select:focus-visible,
+.admin-main textarea:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+.admin-nav-item:disabled,
+.admin-main button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
