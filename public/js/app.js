@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           if (!response.ok) throw new Error(data.error || 'Could not load form security configuration.');
           const key = String(data.settings?.turnstile_site_key || '').trim();
           if (!data.turnstile_ready || !key || key === '1x00000000000000000000AA') {
-            throw new Error('Online inquiries are temporarily unavailable. The administrator must configure a live Cloudflare Turnstile site key, matching server secret, and CSP allowance.');
+            throw new Error('Online inquiries are temporarily unavailable. The administrator must configure a live Turnstile site key, matching server secret, expected action and hostname, and Cloudflare CSP allowance.');
           }
           return key;
         })
