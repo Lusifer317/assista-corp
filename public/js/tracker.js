@@ -66,13 +66,21 @@
       storageSet(SESSION_KEY, sessionId);
     }
     initialized = true;
+    const initializingSessionId = sessionId;
     const created = await postJSON('/api/analytics/session', {
-      sessionId,
+      sessionId: initializingSessionId,
       referrer: document.referrer || 'Direct / Bookmark',
       region: getRegionFromTimezone(),
       consentStatus: 'granted'
     });
     if (!created) {
+      initialized = false;
+      return;
+    }
+    // If consent was withdrawn while session creation was in flight, send a
+    // second deletion request so the late-arriving create cannot remain stored.
+    if (consentStatus !== 'granted' || sessionId !== initializingSessionId) {
+      await postJSON('/api/analytics/consent', { sessionId: initializingSessionId, consentStatus: 'rejected' });
       initialized = false;
       return;
     }
