@@ -8,9 +8,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 1. Data Stores & State
   // -----------------------------------------------------------
   let behindScenarios = [];
+  let cmsContent = {};
 
   try {
     const cntRes = await fetch('/api/content').then(r => r.json());
+    cmsContent = cntRes.content || {};
     if (cntRes.content?.behind_business?.data?.scenarios) {
       behindScenarios = cntRes.content.behind_business.data.scenarios;
     }
@@ -79,6 +81,187 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     ];
   }
+
+  function hydrateHomepageHero() {
+    const hero = cmsContent.hero;
+    if (!hero) return;
+    const data = hero.data || {};
+    const eyebrow = document.querySelector('.hero-eyebrow');
+    if (eyebrow && data.eyebrow) eyebrow.textContent = data.eyebrow;
+
+    const titleLines = document.querySelectorAll('.hero-title-text');
+    if (titleLines.length && hero.title) {
+      titleLines[0].textContent = hero.title;
+      titleLines.forEach((line, index) => {
+        if (index > 0) line.closest('.hero-title-line')?.setAttribute('hidden', '');
+      });
+    }
+    const subtitle = document.querySelector('.hero-lead');
+    if (subtitle && hero.subtitle) subtitle.textContent = hero.subtitle;
+
+    const primary = document.querySelector('.hero-cta-group .btn-primary span:not(.btn-arrow)');
+    const secondary = document.querySelector('.hero-cta-group .btn-link span:not(.btn-arrow)');
+    if (primary && data.cta_primary) primary.textContent = data.cta_primary.replace(/\s*→\s*$/, '');
+    if (secondary && data.cta_secondary) secondary.textContent = data.cta_secondary;
+  }
+
+  async function hydrateSeoMetadata() {
+    try {
+      const response = await fetch('/api/seo?route=' + encodeURIComponent(window.location.pathname));
+      if (!response.ok) return;
+      const { seo } = await response.json();
+      if (!seo) return;
+      if (seo.meta_title) document.title = seo.meta_title;
+
+      const setMeta = (selector, attribute, value) => {
+        if (!value) return;
+        let element = document.head.querySelector(selector);
+        if (!element) {
+          element = document.createElement('meta');
+          const [key, name] = selector.match(/\[(?:name|property)="([^"]+)"\]/) || [];
+          if (key) element.setAttribute(selector.includes('[property=') ? 'property' : 'name', name);
+          document.head.appendChild(element);
+        }
+        element.setAttribute(attribute, value);
+      };
+      setMeta('meta[name="description"]', 'content', seo.meta_description);
+      setMeta('meta[property="og:title"]', 'content', seo.meta_title);
+      setMeta('meta[property="og:description"]', 'content', seo.meta_description);
+
+      if (seo.og_image) {
+        try {
+          const image = new URL(seo.og_image);
+          if (image.protocol === 'https:' && !image.username && !image.password) setMeta('meta[property="og:image"]', 'content', image.href);
+        } catch {}
+      }
+      if (seo.canonical_url) {
+        try {
+          const canonical = new URL(seo.canonical_url);
+          if (canonical.protocol === 'https:' && !canonical.username && !canonical.password) {
+            let link = document.head.querySelector('link[rel="canonical"]');
+            if (!link) {
+              link = document.createElement('link');
+              link.rel = 'canonical';
+              document.head.appendChild(link);
+            }
+            link.href = canonical.href;
+          }
+        } catch {}
+      }
+    } catch (error) {
+      console.warn('SEO metadata could not be loaded; using page defaults.', error);
+    }
+  }
+
+  async function hydrateServicesPage() {
+    if (window.location.pathname.replace(/\/$/, '') !== '/services') return;
+    try {
+      const response = await fetch('/api/services');
+      if (!response.ok) return;
+      const { services } = await response.json();
+      const bySlug = new Map((services || []).map(service => [service.slug, service]));
+      const slugs = ['executive-support', 'finance-accounting', 'customer-support', 'recruitment-talent'];
+      document.querySelectorAll('.service-card').forEach((card, index) => {
+        const service = bySlug.get(slugs[index]);
+        if (!service) return;
+        const title = card.querySelector('.service-title');
+        const summary = card.querySelector('.service-summary');
+        const list = card.querySelector('.service-deliverables-list');
+        const roles = card.querySelector('.service-roles-pill');
+        if (title) title.textContent = service.name;
+        if (summary) summary.textContent = service.tagline;
+        if (list) {
+          list.replaceChildren();
+          (service.deliverables || []).slice(0, 4).forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'deliverable-item';
+            const tick = document.createElement('span');
+            tick.className = 'deliverable-tick';
+            tick.textContent = '✓';
+            const text = document.createElement('span');
+            text.textContent = String(item);
+            li.append(tick, text);
+            list.appendChild(li);
+          });
+        }
+        if (roles) roles.textContent = (service.team_roles || []).slice(0, 3).join(' · ');
+      });
+    } catch (error) {
+      console.warn('Services content could not be loaded; using page defaults.', error);
+    }
+  }
+
+  function renderIndustryWorkflows(grid, workflows) {
+    if (!grid) return;
+    grid.replaceChildren();
+    (workflows || []).forEach(workflow => {
+      const card = document.createElement('div');
+      card.className = 'who-for-card';
+      const heading = document.createElement('h4');
+      heading.className = 'who-for-title';
+      heading.textContent = String(workflow);
+      card.appendChild(heading);
+      grid.appendChild(card);
+    });
+  }
+
+  async function hydrateIndustryPage() {
+    if (window.location.pathname !== '/industries' && window.location.pathname !== '/industries.html') return;
+    try {
+      const response = await fetch('/api/industries');
+      if (!response.ok) return;
+      const { industries } = await response.json();
+      const aliases = { finance: 'wealth' };
+      const main = document.querySelector('main');
+      (industries || []).forEach(industry => {
+        if (!/^[a-z0-9-]+$/.test(industry.slug || '')) return;
+        const sectionId = aliases[industry.slug] || industry.slug;
+        let section = document.getElementById(sectionId);
+        if (!section && main) {
+          section = document.createElement('section');
+          section.id = sectionId;
+          section.className = 'section section-subtle';
+          const container = document.createElement('div');
+          container.className = 'container';
+          const intro = document.createElement('div');
+          intro.style.maxWidth = '820px';
+          intro.style.marginBottom = '2.5rem';
+          const strapline = document.createElement('span');
+          strapline.className = 'section-tag';
+          const title = document.createElement('h2');
+          title.className = 'section-title';
+          const summary = document.createElement('p');
+          summary.className = 'section-desc';
+          intro.append(strapline, title, summary);
+          const workflowLabel = document.createElement('h3');
+          workflowLabel.textContent = 'Typical workflows we can support:';
+          workflowLabel.style.cssText = 'font-size:1.15rem;font-weight:700;color:var(--brand-navy);margin-bottom:1rem;';
+          const grid = document.createElement('div');
+          grid.className = 'who-for-grid';
+          grid.style.marginTop = '0';
+          container.append(intro, workflowLabel, grid);
+          section.appendChild(container);
+          main.appendChild(section);
+        }
+        if (!section) return;
+        const strapline = section.querySelector('.section-tag');
+        const title = section.querySelector('.section-title');
+        const summary = section.querySelector('.section-desc');
+        const grid = section.querySelector('.who-for-grid');
+        if (strapline && industry.headline) strapline.textContent = industry.headline;
+        if (title && industry.name) title.textContent = industry.name;
+        if (summary && industry.subheadline) summary.textContent = industry.subheadline;
+        renderIndustryWorkflows(grid, industry.off_their_plate || []);
+      });
+    } catch (error) {
+      console.warn('Industry content could not be loaded; using page defaults.', error);
+    }
+  }
+
+  hydrateHomepageHero();
+  hydrateSeoMetadata();
+  hydrateServicesPage();
+  hydrateIndustryPage();
 
   // -----------------------------------------------------------
   // 2. Responsive Mobile Navigation Drawer (<= 900px)
