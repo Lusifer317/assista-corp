@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (tabId === 'crm') loadCRMLeads();
       if (tabId === 'analytics') loadAnalytics();
       if (tabId === 'cms') loadCMS();
-      if (tabId === 'seo') { if (currentUser.role === 'admin') loadSettings(); loadCMS(); }
+      if (tabId === 'seo') { if (currentUser?.role === 'admin') loadSettings(); loadCMS(); }
       if (tabId === 'audit') loadAuditLogs();
     });
   });
