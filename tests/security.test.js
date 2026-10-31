@@ -4,7 +4,7 @@ const { createCsrfToken, validateCsrf } = require('../lib/csrf');
 const { validateLeadInput, validateAdminNote } = require('../lib/validation');
 const { can, PERMISSIONS } = require('../lib/rbac');
 const { buildCsp } = require('../lib/csp');
-const { recordSession, recordEvent, updateConsent } = require('../lib/analytics');
+const { recordSession, recordEvent, updateConsent, sanitizeEventData } = require('../lib/analytics');
 const { db } = require('../lib/db');
 
 function runSecurityTests() {
@@ -32,6 +32,14 @@ function runSecurityTests() {
   assert.match(csp, /frame-ancestors 'self'/);
   assert.match(csp, /nonce-abc123/);
 
+  assert.deepEqual(
+    sanitizeEventData('page_view', { path: '/contact?token=secret#form', title: 'Contact', email: 'private@example.com' }),
+    { path: '/contact', title: 'Contact' },
+    'only allowlisted analytics fields are retained'
+  );
+  assert.equal(sanitizeEventData('toString', {}), null, 'prototype properties are not valid event types');
+  assert.equal(sanitizeEventData('page_view', { path: 'https://example.com', title: 'Bad path' }), null);
+
   const pendingId = 'ses_pending1234567890';
   assert.equal(recordSession({ sessionId: pendingId, consentStatus: 'pending' }), null, 'pending consent must not create a session');
   assert.equal(recordEvent({ sessionId: pendingId, eventType: 'page_view', eventData: { path: '/' } }), false, 'events cannot be recorded without a session');
@@ -44,8 +52,12 @@ function runSecurityTests() {
   const storedPath = JSON.parse(db.prepare('SELECT path_history FROM visitor_sessions WHERE session_id=?').get(grantedId).path_history)[0];
   assert.equal(storedPath, '/contact', 'page tracking must remove query strings and fragments');
   assert.equal(recordEvent({ sessionId: grantedId, eventType: 'arbitrary_event', eventData: {} }), false, 'unknown event types must be rejected');
+  const leadInsert = db.prepare('INSERT INTO leads (name, business_email, company, industry, session_id) VALUES (?, ?, ?, ?, ?)')
+    .run('Privacy Test', 'privacy-test@example.com', 'Test Company', 'Other', grantedId);
   assert.equal(updateConsent(grantedId, 'rejected'), true);
   assert.equal(db.prepare('SELECT COUNT(*) AS count FROM visitor_sessions WHERE session_id=?').get(grantedId).count, 0, 'withdrawal must delete anonymous session');
+  assert.equal(db.prepare('SELECT COUNT(*) AS count FROM analytics_events WHERE session_id=?').get(grantedId).count, 0, 'withdrawal must delete analytics events');
+  assert.equal(db.prepare('SELECT session_id FROM leads WHERE id=?').get(Number(leadInsert.lastInsertRowid)).session_id, null, 'withdrawal must preserve lead but remove behavioral attribution');
 
   console.log('Security regression tests passed.');
 }
