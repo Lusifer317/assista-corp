@@ -20,6 +20,8 @@
   if (!['pending', 'granted', 'rejected'].includes(consentStatus)) consentStatus = 'pending';
   let sessionId = consentStatus === 'granted' ? storageGet(SESSION_KEY) : null;
   let initialized = false;
+  let hashListenerInstalled = false;
+  let dwellTimersScheduled = false;
 
   function createSessionId() {
     const bytes = new Uint8Array(24);
@@ -75,12 +77,18 @@
       return;
     }
     recordEvent('page_view', { path: window.location.pathname, title: document.title });
-    window.addEventListener('hashchange', () => {
-      recordEvent('page_view', { path: window.location.pathname, title: document.title });
-    });
-    [30, 60, 180, 300].forEach(seconds => {
-      window.setTimeout(() => recordEvent('dwell_milestone', { duration: seconds }), seconds * 1000);
-    });
+    if (!hashListenerInstalled) {
+      window.addEventListener('hashchange', () => {
+        recordEvent('page_view', { path: window.location.pathname, title: document.title });
+      });
+      hashListenerInstalled = true;
+    }
+    if (!dwellTimersScheduled) {
+      [30, 60, 180, 300].forEach(seconds => {
+        window.setTimeout(() => recordEvent('dwell_milestone', { duration: seconds }), seconds * 1000);
+      });
+      dwellTimersScheduled = true;
+    }
   }
 
   function setConsent(status) {
