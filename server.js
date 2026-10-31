@@ -150,7 +150,7 @@ const server=http.createServer(async(req,res)=>{
           if(typeof body[key]!=='string'||body[key].trim().length>max)return sendError(res,`Invalid setting: ${key}.`,400);
           const value=body[key].trim();
           if(key==='sales_email'&&value&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value))return sendError(res,'Invalid sales email address.',400);
-          if(key==='turnstile_site_key'&&value&&!/^[A-Za-z0-9_-]{10,200}$/.test(value))return sendError(res,'Invalid Turnstile site key format.',400);
+          if(key==='turnstile_site_key'&&value&&(!/^[A-Za-z0-9_-]{10,200}$/.test(value)||value==='1x00000000000000000000AA'))return sendError(res,'Enter a live Cloudflare Turnstile site key, not a test key.',400);
           updates.push([key,value]);
         }
         if(Object.keys(body).some(key=>!Object.hasOwn(allowed,key)))return sendError(res,'Unsupported settings field.',400);
