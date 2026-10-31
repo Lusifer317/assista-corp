@@ -628,21 +628,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (consentBanner && window.AssistaAnalytics) {
     const current = window.AssistaAnalytics.getConsent();
-    if (current === 'granted' || current === 'rejected') {
-      consentBanner.style.display = 'none';
-    }
+    if (current === 'granted' || current === 'rejected') consentBanner.style.display = 'none';
 
+    // Keep privacy controls reachable after the visitor makes an initial choice.
+    const privacyLauncher = document.createElement('button');
+    privacyLauncher.type = 'button';
+    privacyLauncher.className = 'privacy-settings-launcher';
+    privacyLauncher.textContent = 'Privacy settings';
+    privacyLauncher.setAttribute('aria-controls', 'consent-banner');
+    privacyLauncher.setAttribute('aria-expanded', 'false');
+    privacyLauncher.style.cssText = 'position:fixed;left:1rem;bottom:1rem;z-index:900;min-height:40px;padding:0.55rem 0.85rem;border:1px solid #D7D9D2;border-radius:999px;background:#FFFFFF;color:#26332F;font:600 0.75rem/1.2 system-ui,sans-serif;box-shadow:0 4px 18px rgba(20,32,28,0.12);cursor:pointer;';
+    document.body.appendChild(privacyLauncher);
+    privacyLauncher.addEventListener('click', () => {
+      consentBanner.style.display = 'block';
+      privacyLauncher.setAttribute('aria-expanded', 'true');
+      (btnRejectConsent || btnAcceptConsent)?.focus();
+    });
+
+    const closeConsentPanel = () => {
+      consentBanner.style.display = 'none';
+      privacyLauncher.setAttribute('aria-expanded', 'false');
+    };
     if (btnAcceptConsent) {
       btnAcceptConsent.addEventListener('click', () => {
         window.AssistaAnalytics.setConsent('granted');
-        consentBanner.style.display = 'none';
+        closeConsentPanel();
       });
     }
-
     if (btnRejectConsent) {
       btnRejectConsent.addEventListener('click', () => {
         window.AssistaAnalytics.setConsent('rejected');
-        consentBanner.style.display = 'none';
+        closeConsentPanel();
       });
     }
   }
