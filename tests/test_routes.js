@@ -148,7 +148,7 @@ async function runRouteTests() {
     // Check OpenGraph
     assert.ok(res.body.includes('property="og:title"'), `Route ${item.route} must have og:title`);
     assert.ok(res.body.includes('property="og:description"'), `Route ${item.route} must have og:description`);
-    const jsonLdBlocks = [...res.body.matchAll(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/gi)];
+    const jsonLdBlocks = [...res.body.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
     assert.ok(jsonLdBlocks.length > 0, `Route ${item.route} must include JSON-LD structured data`);
     for (const block of jsonLdBlocks) {
       assert.doesNotThrow(() => JSON.parse(block[1]), `Route ${item.route} JSON-LD must be valid JSON`);
