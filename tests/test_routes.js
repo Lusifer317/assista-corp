@@ -118,7 +118,7 @@ async function runRouteTests() {
     {
       route: '/trust',
       expectedTitle: 'Trust & Assurance | Security and Quality Roadmap | Assista Corp',
-      mustInclude: ['Trust should be verifiable—not just a badge.', 'ISO/IEC 27001:2022', 'ISO 9001:2026', 'SOC 2 examination', 'These examples are not client testimonials'],
+      mustInclude: ['Trust should be verifiable—not just a badge.', 'ISO/IEC 27001:2022', 'ISO 9001:2026', 'SOC 2 examination', 'They are not client testimonials'],
       isHub: true
     },
     {
