@@ -23,6 +23,7 @@ const VIEWS_DIR = path.join(__dirname, 'views');
 const PUBLIC_ROUTES = {
   '/': path.join(PUBLIC_DIR, 'index.html'),
   '/services': path.join(PUBLIC_DIR, 'services', 'index.html'),
+  '/insights': path.join(PUBLIC_DIR, 'insights', 'index.html'),
   '/services/executive-support': path.join(PUBLIC_DIR, 'services', 'executive-support.html'),
   '/services/finance-reconciliation': path.join(PUBLIC_DIR, 'services', 'finance-reconciliation.html'),
   '/services/customer-care': path.join(PUBLIC_DIR, 'services', 'customer-care.html'),
