@@ -182,6 +182,26 @@ async function runRouteTests() {
   }
   console.log('✓ All 12 semantic routes passed.\n');
 
+  // 1a. Verify homepage LCP discovery and safe static asset caching.
+  const homepageRes = await invokeServer('GET', '/');
+  assert.ok(homepageRes.body.includes('<link rel="preload" as="image" href="/images/hero-operations-collab.jpg" fetchpriority="high">'),
+    'Homepage must preload the hero LCP image with high priority');
+  assert.ok(homepageRes.body.includes('loading="eager" fetchpriority="high" decoding="async" class="hero-main-img"'),
+    'Hero image must be immediately discoverable and high priority');
+  assert.ok(!homepageRes.body.includes('/videos/hero-operations.mp4'),
+    'Homepage must not request the untracked hero video asset');
+
+  const cssAssetRes = await invokeServer('GET', '/css/styles.css');
+  assert.strictEqual(cssAssetRes.status, 200, 'Static CSS asset must be served successfully');
+  assert.strictEqual(cssAssetRes.headers['Cache-Control'], 'public, max-age=604800, stale-while-revalidate=86400',
+    'Static assets must receive the bounded browser cache policy');
+  assert.strictEqual(homepageRes.headers['Cache-Control'], 'private, no-store',
+    'Public HTML should not inherit long-lived static asset caching');
+  const healthRes = await invokeServer('GET', '/health');
+  assert.strictEqual(healthRes.headers['Cache-Control'], 'no-store, no-cache, must-revalidate',
+    'Health/API responses must remain non-cacheable');
+  console.log('✓ Homepage LCP discovery and cache policy verified.\\n');
+
   // 2. Test Trailing Slash Normalization
   console.log('2. Testing trailing slash normalization...');
   const trailingRes = await invokeServer('GET', '/services/');
