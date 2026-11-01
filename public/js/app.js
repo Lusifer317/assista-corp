@@ -698,6 +698,27 @@ document.addEventListener('DOMContentLoaded', async () => {
   const contactPageForm = document.getElementById('contact-page-form');
   const contactPageSuccess = document.getElementById('contact-page-success');
   if (contactPageForm) {
+    const contactParams = new URLSearchParams(window.location.search);
+    const contactService = document.getElementById('contact-service');
+    const contactMessage = document.getElementById('contact-message');
+    const selectedScopeTasks = contactParams.getAll('task')
+      .map(task => task.trim().slice(0, 200))
+      .filter(Boolean)
+      .slice(0, 20);
+    const requestedService = contactParams.get('service');
+
+    if (contactService && requestedService &&
+        Array.from(contactService.options).some(option => option.value === requestedService)) {
+      contactService.value = requestedService;
+    }
+    if (contactMessage && selectedScopeTasks.length) {
+      const scopeSummary = 'Support tasks to discuss:\\n' +
+        selectedScopeTasks.map(task => '- ' + task).join('\\n');
+      contactMessage.value = contactMessage.value.trim()
+        ? scopeSummary + '\\n\\nAdditional context:\\n' + contactMessage.value
+        : scopeSummary + '\\n\\nAdditional context:';
+    }
+
     mountTurnstile(contactPageForm);
     contactPageForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -712,10 +733,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         business_email: formData.get('email'),
         company: formData.get('company'),
         industry: formData.get('service') || 'General Inquiries',
-        requirements: [formData.get('service') || 'Operational Infrastructure'],
+        requirements: selectedScopeTasks.length
+          ? selectedScopeTasks
+          : [formData.get('service') || 'Operational Infrastructure'],
         team_configuration: {
           role: formData.get('role'),
-          website: formData.get('website')
+          website: formData.get('website'),
+          selected_tasks: selectedScopeTasks
         },
         message: formData.get('message'),
         session_id: window.AssistaAnalytics ? window.AssistaAnalytics.getSessionId() : null,
