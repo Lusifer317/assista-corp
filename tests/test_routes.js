@@ -116,6 +116,12 @@ async function runRouteTests() {
       isHub: true
     },
     {
+      route: '/trust',
+      expectedTitle: 'Trust & Assurance | Security and Quality Roadmap | Assista Corp',
+      mustInclude: ['Trust should be verifiable—not just a badge.', 'ISO/IEC 27001:2022', 'ISO 9001:2026', 'SOC 2 examination', 'They are not client testimonials'],
+      isHub: true
+    },
+    {
       route: '/about',
       expectedTitle: 'About Assista Corp | Business Operations Support',
       mustInclude: ['The People Behind Business.', 'Why human operational infrastructure matters.', 'Confidentiality Standards', 'Institutional Governance'],
@@ -130,7 +136,7 @@ async function runRouteTests() {
   ];
 
   // 1. Test All 10 Valid Routes (HTTP 200, SEO metadata, Canonical, Content)
-  console.log('1. Testing all 11 semantic routes...');
+  console.log('1. Testing all 12 semantic routes...');
   for (const item of EXPECTED_ROUTES) {
     const res = await invokeServer('GET', item.route);
     assert.strictEqual(res.status, 200, `Route ${item.route} must return status 200 (got ${res.status})`);
@@ -174,7 +180,7 @@ async function runRouteTests() {
 
     console.log(`  ✓ Route ${item.route} verified (Status 200, SEO metadata, Content, Navigation, Breadcrumbs)`);
   }
-  console.log('✓ All 11 semantic routes passed.\n');
+  console.log('✓ All 12 semantic routes passed.\n');
 
   // 2. Test Trailing Slash Normalization
   console.log('2. Testing trailing slash normalization...');
