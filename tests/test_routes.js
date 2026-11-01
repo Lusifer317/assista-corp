@@ -63,68 +63,74 @@ async function runRouteTests() {
   const EXPECTED_ROUTES = [
     {
       route: '/',
-      expectedTitle: 'ASSISTA CORP | The People Behind Business.',
+      expectedTitle: 'Business Support Services & Operations Teams | Assista Corp',
       mustInclude: ['Business operations,', 'handled by people.', 'Dedicated Teams', 'Core Capabilities', 'WHATEVER MOVES YOUR BUSINESS FORWARD'],
       isHub: true
     },
     {
       route: '/services',
-      expectedTitle: 'Business Support Services | Assista Corp',
-      mustInclude: ['Operational support shaped around the work your business needs done.', 'Executive Support', 'Finance &amp; Reconciliation', 'Customer Care &amp; CX', 'Recruitment &amp; Talent'],
+      expectedTitle: 'Business Support Services & Teams | Assista Corp',
+      mustInclude: ['Business support services shaped around the work your team needs done.', 'Executive Support', 'Finance &amp; Reconciliation', 'Customer Care &amp; CX', 'Recruitment &amp; Talent'],
       isHub: true
     },
     {
       route: '/services/executive-support',
-      expectedTitle: 'Executive Support Outsourcing & Executive Assistant Services | Assista Corp',
-      mustInclude: ['Protect leadership focus. Keep the work moving.', 'Calendar and meeting coordination', 'Travel research and itinerary preparation'],
+      expectedTitle: 'Executive Assistant & Executive Support Services | Assista Corp',
+      mustInclude: ['Executive assistant support that protects leadership focus.', 'Calendar and meeting coordination', 'Travel research and itinerary preparation'],
       isHub: false
     },
     {
       route: '/services/finance-reconciliation',
-      expectedTitle: 'Finance & Reconciliation Support Services | Assista Corp',
-      mustInclude: ['Keep finance operations organized, reviewable, and moving.', 'Statement reconciliation preparation', 'Payment release and fund movement remain with your authorized signatories.'],
+      expectedTitle: 'Finance Operations & Reconciliation Support | Assista Corp',
+      mustInclude: ['Finance and reconciliation support that keeps work reviewable.', 'Statement reconciliation preparation', 'Payment release and fund movement remain with your authorized signatories.'],
       isHub: false
     },
     {
       route: '/services/customer-care',
-      expectedTitle: 'Customer Care & Customer Experience Support | Assista Corp',
-      mustInclude: ['Make every customer interaction feel considered and consistent.', 'Email and ticket triage', 'VIP and sensitive case escalation'],
+      expectedTitle: 'Customer Support & Customer Experience Services | Assista Corp',
+      mustInclude: ['Customer support operations that feel considered and consistent.', 'Email and ticket triage', 'VIP and sensitive case escalation'],
       isHub: false
     },
     {
       route: '/services/recruitment-talent',
-      expectedTitle: 'Recruitment & Talent Operations Support | Assista Corp',
-      mustInclude: ['Keep hiring pipelines organized from role intake to interview.', 'Candidate sourcing support', 'Final candidate selection'],
+      expectedTitle: 'Recruitment Coordination & Talent Operations | Assista Corp',
+      mustInclude: ['Recruitment coordination that keeps hiring pipelines moving.', 'Candidate sourcing support', 'Final candidate selection'],
       isHub: false
     },
     {
+      route: '/insights',
+      expectedTitle: 'Business Operations Insights & Guides | Assista Corp',
+      mustInclude: ['Practical guides to better business operations.', 'How to scope executive assistant support', 'Building a reviewable reconciliation workflow', 'Designing a practical customer support queue', 'Creating a consistent recruitment coordination process'],
+      isHub: true
+    },
+    {
       route: '/industries',
-      expectedTitle: 'Industries & Sectors | Assista Corp',
+      expectedTitle: 'Industry-Specific Business Operations Support | Assista Corp',
       mustInclude: ['Healthcare &amp; Clinical Practices', 'Private Wealth &amp; Family Offices', 'Corporate Law Firms', 'E-Commerce &amp; Brands', 'Typical workflows we can support:'],
       isHub: true
     },
     {
       route: '/how-we-work',
-      expectedTitle: 'How We Work | Assista Corp',
-      mustInclude: ['How dedicated operational cells integrate and deliver.', 'STAGE 01', 'STAGE 02', 'STAGE 03', 'STAGE 04', 'Understand', 'Build', 'Integrate', 'Operate'],
+      expectedTitle: 'How Our Business Support Teams Work | Assista Corp',
+      mustInclude: ['How our business support teams integrate and deliver.', 'STAGE 01', 'STAGE 02', 'STAGE 03', 'STAGE 04', 'Understand', 'Build', 'Integrate', 'Operate'],
       isHub: true
     },
     {
       route: '/about',
-      expectedTitle: 'About Assista Corp | The People Behind Business.',
-      mustInclude: ['The People Behind Business.', 'Why human operational infrastructure matters.', 'Confidentiality Standards', 'Operating Governance'],
+      expectedTitle: 'About Assista Corp | Business Operations Support',
+      mustInclude: ['The People Behind Business.', 'Why human operational infrastructure matters.', 'Confidentiality Standards', 'Institutional Governance'],
       isHub: true
     },
     {
       route: '/contact',
-      expectedTitle: 'Contact Assista Corp | Operational Consultation',
-      mustInclude: ['Schedule an operational consultation.', 'Direct Business Inquiry', 'operations@assistacorp.com', 'A client director will review your inquiry and follow up directly.'],
+      expectedTitle: 'Contact Assista Corp | Business Support Consultation',
+      mustInclude: ['Discuss your business support requirements.', 'Direct Business Inquiry', 'operations@assistacorp.com', 'A client director will review your inquiry and follow up directly.'],
       isHub: true
     }
   ];
 
   // 1. Test All 10 Valid Routes (HTTP 200, SEO metadata, Canonical, Content)
-  console.log('1. Testing all 10 semantic routes...');
+  console.log('1. Testing all 11 semantic routes...');
   for (const item of EXPECTED_ROUTES) {
     const res = await invokeServer('GET', item.route);
     assert.strictEqual(res.status, 200, `Route ${item.route} must return status 200 (got ${res.status})`);
@@ -135,13 +141,18 @@ async function runRouteTests() {
       `Route ${item.route} must have title "${item.expectedTitle}"`);
     
     // Check Canonical Tag
-    const expectedCanonical = `https://assistacorp.com${item.route === '/' ? '' : item.route}`;
+    const expectedCanonical = `https://assistacorp.com${item.route}`;
     assert.ok(res.body.includes(`<link rel="canonical" href="${expectedCanonical}">`),
       `Route ${item.route} must have canonical URL "${expectedCanonical}"`);
 
     // Check OpenGraph
     assert.ok(res.body.includes('property="og:title"'), `Route ${item.route} must have og:title`);
     assert.ok(res.body.includes('property="og:description"'), `Route ${item.route} must have og:description`);
+    const jsonLdBlocks = [...res.body.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)];
+    assert.ok(jsonLdBlocks.length > 0, `Route ${item.route} must include JSON-LD structured data`);
+    for (const block of jsonLdBlocks) {
+      assert.doesNotThrow(() => JSON.parse(block[1]), `Route ${item.route} JSON-LD must be valid JSON`);
+    }
 
     // Check Required Content
     for (const phrase of item.mustInclude) {
@@ -163,13 +174,13 @@ async function runRouteTests() {
 
     console.log(`  ✓ Route ${item.route} verified (Status 200, SEO metadata, Content, Navigation, Breadcrumbs)`);
   }
-  console.log('✓ All 10 semantic routes passed.\n');
+  console.log('✓ All 11 semantic routes passed.\n');
 
   // 2. Test Trailing Slash Normalization
   console.log('2. Testing trailing slash normalization...');
   const trailingRes = await invokeServer('GET', '/services/');
   assert.strictEqual(trailingRes.status, 200, '/services/ must resolve cleanly with status 200');
-  assert.ok(trailingRes.body.includes('Operational support shaped around the work your business needs done.'), '/services/ renders redesigned services page');
+  assert.ok(trailingRes.body.includes('Business support services shaped around the work your team needs done.'), '/services/ renders redesigned services page');
   console.log('✓ Trailing slash normalization verified.\n');
 
   // 3. Test Unknown Route -> Branded 404 Page (HTTP Status 404)

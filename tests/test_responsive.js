@@ -55,7 +55,7 @@ const requiredNavLinks = [
   'href="/industries"',
   'href="/how-we-work"',
   'href="/about"',
-  'href="/how-we-work#insights"'
+  'href="/insights"'
 ];
 for (const link of requiredNavLinks) {
   assert.ok(html.includes(link), `Mobile drawer contains navigation link: ${link}`);
