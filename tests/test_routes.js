@@ -118,7 +118,7 @@ async function runRouteTests() {
     {
       route: '/about',
       expectedTitle: 'About Assista Corp | Business Operations Support',
-      mustInclude: ['The People Behind Business.', 'Why human operational infrastructure matters.', 'Confidentiality Standards', 'Operating Governance'],
+      mustInclude: ['The People Behind Business.', 'Why human operational infrastructure matters.', 'Confidentiality Standards', 'Institutional Governance'],
       isHub: true
     },
     {
@@ -141,7 +141,7 @@ async function runRouteTests() {
       `Route ${item.route} must have title "${item.expectedTitle}"`);
     
     // Check Canonical Tag
-    const expectedCanonical = `https://assistacorp.com${item.route === '/' ? '' : item.route}`;
+    const expectedCanonical = `https://assistacorp.com${item.route}`;
     assert.ok(res.body.includes(`<link rel="canonical" href="${expectedCanonical}">`),
       `Route ${item.route} must have canonical URL "${expectedCanonical}"`);
 
