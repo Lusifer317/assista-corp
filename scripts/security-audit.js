@@ -15,7 +15,7 @@ if (dependencyCount === 0) {
 const forbiddenPatterns = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /AKIA[0-9A-Z]{16}/,
-  /(?:password|secret|api[_-]?key)\s*[:=]\s*['"][^'"]{12,}['"]/i
+  /(?:\bpassword\b|\bsecret\b|\bapi[_-]?key\b)\s*[:=]\s*(['"])([^'"\r\n]{12,})\1/i
 ];
 
 const skipDirs = new Set(['node_modules', '.git', 'data']);
