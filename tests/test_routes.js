@@ -98,6 +98,12 @@ async function runRouteTests() {
       isHub: false
     },
     {
+      route: '/insights',
+      expectedTitle: 'Business Operations Insights & Guides | Assista Corp',
+      mustInclude: ['Practical guides to better business operations.', 'How to scope executive assistant support', 'Building a reviewable reconciliation workflow', 'Designing a practical customer support queue', 'Creating a consistent recruitment coordination process'],
+      isHub: true
+    },
+    {
       route: '/industries',
       expectedTitle: 'Industries & Sectors | Assista Corp',
       mustInclude: ['Healthcare &amp; Clinical Practices', 'Private Wealth &amp; Family Offices', 'Corporate Law Firms', 'E-Commerce &amp; Brands', 'Typical workflows we can support:'],
@@ -142,6 +148,11 @@ async function runRouteTests() {
     // Check OpenGraph
     assert.ok(res.body.includes('property="og:title"'), `Route ${item.route} must have og:title`);
     assert.ok(res.body.includes('property="og:description"'), `Route ${item.route} must have og:description`);
+    const jsonLdBlocks = [...res.body.matchAll(/<script type="application\\/ld\\+json">([\\s\\S]*?)<\\/script>/gi)];
+    assert.ok(jsonLdBlocks.length > 0, `Route ${item.route} must include JSON-LD structured data`);
+    for (const block of jsonLdBlocks) {
+      assert.doesNotThrow(() => JSON.parse(block[1]), `Route ${item.route} JSON-LD must be valid JSON`);
+    }
 
     // Check Required Content
     for (const phrase of item.mustInclude) {
