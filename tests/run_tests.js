@@ -12,6 +12,7 @@ const { can, PERMISSIONS } = require('../lib/rbac');
 const { buildCsp } = require('../lib/csp');
 
 console.log('--- RUNNING ASSISTA CORP TEST SUITE ---');
+require('./test_client_ip').runClientIpTests(); console.log('✓ Test 0b: Trusted Cloudflare client IP resolution');
 
 require('./test_login_page'); console.log('✓ Test 0: Operations login CSP and credential exposure');
 require('./test_admin_runtime'); console.log('✓ Test 0a: Admin portal runtime and production form safeguards');
