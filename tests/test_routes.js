@@ -69,32 +69,32 @@ async function runRouteTests() {
     },
     {
       route: '/services',
-      expectedTitle: 'Services & Disciplines | Assista Corp',
-      mustInclude: ['Executive Support', 'Finance &amp; Reconciliation', 'Customer Care &amp; CX', 'Recruitment &amp; Talent', 'The Dedicated Operational Cell Model'],
+      expectedTitle: 'Business Support Services | Assista Corp',
+      mustInclude: ['Operational support shaped around the work your business needs done.', 'Executive Support', 'Finance &amp; Reconciliation', 'Customer Care &amp; CX', 'Recruitment &amp; Talent'],
       isHub: true
     },
     {
       route: '/services/executive-support',
-      expectedTitle: 'Executive Support | Assista Corp',
-      mustInclude: ['Executive Support &amp; Operational Gatekeeping', 'Calendar &amp; Meeting Triage', 'Complex Travel Itineraries'],
+      expectedTitle: 'Executive Support Outsourcing & Executive Assistant Services | Assista Corp',
+      mustInclude: ['Protect leadership focus. Keep the work moving.', 'Calendar and meeting coordination', 'Travel research and itinerary preparation'],
       isHub: false
     },
     {
       route: '/services/finance-reconciliation',
-      expectedTitle: 'Finance & Reconciliation | Assista Corp',
-      mustInclude: ['Finance &amp; Transactional Reconciliation Support', 'Statement Reconciliation', 'Zero Fund Disbursement'],
+      expectedTitle: 'Finance & Reconciliation Support Services | Assista Corp',
+      mustInclude: ['Keep finance operations organized, reviewable, and moving.', 'Statement reconciliation preparation', 'Payment release and fund movement remain with your authorized signatories.'],
       isHub: false
     },
     {
       route: '/services/customer-care',
-      expectedTitle: 'Customer Care & CX | Assista Corp',
-      mustInclude: ['Customer Care &amp; Human CX Operations', 'Omnichannel Support', 'Brand Voice'],
+      expectedTitle: 'Customer Care & Customer Experience Support | Assista Corp',
+      mustInclude: ['Make every customer interaction feel considered and consistent.', 'Email and ticket triage', 'VIP and sensitive case escalation'],
       isHub: false
     },
     {
       route: '/services/recruitment-talent',
-      expectedTitle: 'Recruitment & Talent | Assista Corp',
-      mustInclude: ['Recruitment Operations &amp; Talent Coordination', 'Active Sourcing', 'Rubric Screening'],
+      expectedTitle: 'Recruitment & Talent Operations Support | Assista Corp',
+      mustInclude: ['Keep hiring pipelines organized from role intake to interview.', 'Candidate sourcing support', 'Final candidate selection'],
       isHub: false
     },
     {
@@ -158,7 +158,7 @@ async function runRouteTests() {
 
     // Check Breadcrumbs (on non-homepage routes)
     if (item.route !== '/') {
-      assert.ok(res.body.includes('class="breadcrumb-nav"'), `Sub-page ${item.route} must have breadcrumb navigation`);
+      assert.ok(res.body.includes(item.route.startsWith('/services') ? 'class="svc-breadcrumb"' : 'class="breadcrumb-nav"'), `Sub-page ${item.route} must have breadcrumb navigation`);
     }
 
     console.log(`  ✓ Route ${item.route} verified (Status 200, SEO metadata, Content, Navigation, Breadcrumbs)`);
@@ -169,7 +169,7 @@ async function runRouteTests() {
   console.log('2. Testing trailing slash normalization...');
   const trailingRes = await invokeServer('GET', '/services/');
   assert.strictEqual(trailingRes.status, 200, '/services/ must resolve cleanly with status 200');
-  assert.ok(trailingRes.body.includes('Services &amp; Disciplines'), '/services/ renders services page');
+  assert.ok(trailingRes.body.includes('Operational support shaped around the work your business needs done.'), '/services/ renders redesigned services page');
   console.log('✓ Trailing slash normalization verified.\n');
 
   // 3. Test Unknown Route -> Branded 404 Page (HTTP Status 404)
