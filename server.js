@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const url = require('node:url');
 
+const { getClientIp } = require('./lib/client-ip');
 const { installHttpSecurity } = require('./lib/http-security');
 installHttpSecurity();
 
@@ -37,7 +38,6 @@ function parseBody(req) { return new Promise(resolve => { let body=''; req.on('d
 function sendJSON(res, data, statusCode=200) { res.writeHead(statusCode, {'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store, no-cache, must-revalidate','X-Content-Type-Options':'nosniff'}); res.end(JSON.stringify(data)); }
 function sendError(res, message, statusCode=400) { sendJSON(res,{error:message},statusCode); }
 function sendFile(res, filePath, contentType, statusCode=200) { fs.readFile(filePath,(err,content)=>{ if(err){res.writeHead(404,{'Content-Type':'text/plain'});res.end('404 Not Found');return;} res.writeHead(statusCode,{'Content-Type':contentType,'X-Content-Type-Options':'nosniff','X-Frame-Options':'SAMEORIGIN'});res.end(content); }); }
-function getClientIp(req) { const forwarded=req.headers['x-forwarded-for']; if(process.env.TRUST_PROXY==='cloudflare'&&forwarded){const first=String(forwarded).split(',')[0].trim();if(first)return first;} return req.socket?.remoteAddress||'127.0.0.1'; }
 function authenticate(req) { const cookies=parseCookies(req); const token=cookies.assista_session||req.headers['authorization']?.replace(/^Bearer\s+/i,''); return validateSession(token); }
 function requirePermissionOr403(res,user,permission) { if(!requirePermission(user,permission)){sendError(res,'Access denied.',403);return false;} return true; }
 function boundedText(value, maxLength, required = false) {
